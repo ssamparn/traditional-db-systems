@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -20,11 +19,9 @@ public class AddressController {
     private final AddressRepository addressRepository;
 
     @GetMapping("/address/get/all")
-    public List<AddressResponse> getAddress() {
-        return addressRepository.findAll()
-                .stream()
+    public Flux<AddressResponse> getAddress() {
+        return Flux.fromIterable(this.addressRepository.findAll())
                 .map(addressMapper::toAddressResponse)
-                .collect(Collectors.toList());
+                .subscribeOn(Schedulers.boundedElastic());
     }
-
 }
