@@ -1,4 +1,4 @@
-package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model;
+package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

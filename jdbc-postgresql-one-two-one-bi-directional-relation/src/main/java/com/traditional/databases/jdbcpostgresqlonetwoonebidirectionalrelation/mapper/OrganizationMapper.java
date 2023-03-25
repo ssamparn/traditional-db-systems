@@ -2,8 +2,8 @@ package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.m
 
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity.Address;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity.Organization;
-import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.AddressRequest;
-import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.OrganizationRequest;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.AddressRequest;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
 import org.springframework.stereotype.Component;
 
 @Component

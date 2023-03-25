@@ -4,7 +4,7 @@ import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.repository.AddressRepository;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.repository.OrganizationRepository;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.mapper.OrganizationMapper;
-import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.OrganizationRequest;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

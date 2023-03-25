@@ -2,7 +2,7 @@ package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.w
 
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity.Organization;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.service.OrganizationService;
-import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.OrganizationRequest;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
