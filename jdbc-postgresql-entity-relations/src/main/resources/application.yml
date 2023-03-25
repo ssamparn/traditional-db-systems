@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+database:
+  name: jdbc_postgresql_book_relations
+  type: postgresql
+  host: localhost
+  port: 5432
+  username: sashank
+  password: password
+
+spring:
+  application:
+    name: book-relations-service
+  datasource:
+    url: jdbc:${database.type}://${database.host}:${database.port}/${database.name}
+    username: ${database.username}
+    password: ${database.password}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
