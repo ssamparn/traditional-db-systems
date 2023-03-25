@@ -4,10 +4,16 @@ import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity.Organization;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.AddressRequest;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.response.AddressResponse;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.response.OrganizationResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class OrganizationMapper {
+
+    private final AddressMapper addressMapper;
 
     public Organization toEntity(final OrganizationRequest request) {
         Organization entity = new Organization();
@@ -27,5 +33,14 @@ public class OrganizationMapper {
         entity.setCountry(request.getCountry());
         entity.setZipcode(request.getZipcode());
         return entity;
+    }
+
+    public OrganizationResponse toResponse(Organization organization) {
+        OrganizationResponse response = new OrganizationResponse();
+        response.setId(organization.getId());
+        response.setName(organization.getName());
+        response.setOrgId(organization.getOrgId());
+        response.setAddress(addressMapper.toAddressResponse(organization.getAddress()));
+        return response;
     }
 }

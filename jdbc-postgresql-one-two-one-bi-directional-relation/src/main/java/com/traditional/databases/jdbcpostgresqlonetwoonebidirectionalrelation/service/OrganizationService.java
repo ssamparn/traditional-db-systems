@@ -5,11 +5,15 @@ import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.repository.OrganizationRepository;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.mapper.OrganizationMapper;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.response.OrganizationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,5 +29,12 @@ public class OrganizationService {
                 .map(organizationMapper::toEntity)
                 .map(organizationRepository::save)
                 .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public List<OrganizationResponse> getAllOrganizations() {
+        return organizationRepository.findAll()
+                .stream()
+                .map(organizationMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }
