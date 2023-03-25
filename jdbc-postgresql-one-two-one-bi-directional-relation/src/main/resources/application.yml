@@ -1,0 +1,27 @@
+server:
+  port: 8081
+
+database:
+  name: jdbc_postgresql_one_two_one_bi_directional_relations
+  type: postgresql
+  host: localhost
+  port: 5432
+  username: sashank
+  password: password
+
+spring:
+  application:
+    name: one-two-one-bi-directional-relations
+  datasource:
+    url: jdbc:${database.type}://${database.host}:${database.port}/${database.name}
+    username: ${database.username}
+    password: ${database.password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true

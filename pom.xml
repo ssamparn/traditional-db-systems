@@ -17,6 +17,7 @@
 
     <modules>
         <module>jdbc-postgresql-entity-relations</module>
+        <module>jdbc-postgresql-one-two-one-bi-directional-relation</module>
     </modules>
 
 </project>
