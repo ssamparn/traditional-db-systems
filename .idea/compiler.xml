@@ -9,6 +9,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="jdbc-postgresql-one-two-one-bi-directional-relation" />
         <module name="jdbc-postgresql-entity-relations" />
+        <module name="jdbc-postgresql-one-two-many-bi-directional-relation" />
+        <module name="jdbc-postgresql-many-two-many-bi-directional-relation" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="11" />
@@ -16,6 +18,8 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="jdbc-postgresql-entity-relations" options="-parameters" />
+      <module name="jdbc-postgresql-many-two-many-bi-directional-relation" options="-parameters" />
+      <module name="jdbc-postgresql-one-two-many-bi-directional-relation" options="-parameters" />
       <module name="jdbc-postgresql-one-two-one-bi-directional-relation" options="-parameters" />
     </option>
   </component>

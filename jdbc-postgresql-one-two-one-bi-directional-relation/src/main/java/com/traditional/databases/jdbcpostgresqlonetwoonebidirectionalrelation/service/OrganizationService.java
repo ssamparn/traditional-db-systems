@@ -1,5 +1,6 @@
 package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.service;
 
+import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity.Organization;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.repository.AddressRepository;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.repository.OrganizationRepository;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.mapper.OrganizationMapper;
@@ -7,12 +8,14 @@ import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.we
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.response.OrganizationResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrganizationService {
@@ -50,6 +53,24 @@ public class OrganizationService {
                 .map(organization -> organizationMapper.updateEntity(organizationId, organization, request))
                 .map(organizationRepository::save)
                 .map(organizationMapper::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Mono<OrganizationResponse> deleteOrganizationById(Long organizationId) {
+        return this.findById(organizationId)
+                .publishOn(Schedulers.boundedElastic())
+                .map(organization -> {
+                    this.organizationRepository.delete(organization);
+                    return organization;
+                })
+                .publishOn(Schedulers.boundedElastic())
+                .map(organizationMapper::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Mono<Organization> findById(Long organizationId) {
+        return Mono.fromSupplier(() -> this.organizationRepository.findById(organizationId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Organization not found with Id: " + organizationId)))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 }
