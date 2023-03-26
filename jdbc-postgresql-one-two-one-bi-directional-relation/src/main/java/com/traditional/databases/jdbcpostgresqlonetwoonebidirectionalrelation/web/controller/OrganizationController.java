@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +38,13 @@ public class OrganizationController {
     @GetMapping("/organization/get/{organizationId}")
     public Mono<ResponseEntity<OrganizationResponse>> getOrganization(@PathVariable(name = "organizationId") Long organizationId) {
         return organizationService.getOrganizationById(organizationId)
+                .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    }
+
+    @PutMapping("/organization/update/{organizationId}")
+    public Mono<ResponseEntity<OrganizationResponse>> updateOrganization(@PathVariable(name = "organizationId") Long organizationId,
+                                                     @RequestBody OrganizationRequest organizationRequest) {
+        return organizationService.updateOrganization(organizationId, organizationRequest)
                 .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
     }
 }

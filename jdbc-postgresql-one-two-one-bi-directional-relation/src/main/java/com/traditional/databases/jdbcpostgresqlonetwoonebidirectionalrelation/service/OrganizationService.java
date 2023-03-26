@@ -42,4 +42,14 @@ public class OrganizationService {
                 .map(organizationMapper::toResponse)
                 .subscribeOn(Schedulers.boundedElastic());
     }
+
+    public Mono<OrganizationResponse> updateOrganization(Long organizationId, OrganizationRequest request) {
+        return Mono.fromSupplier(() -> this.organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with Id: " + organizationId)))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(organization -> organizationMapper.updateEntity(organizationId, organization, request))
+                .map(organizationRepository::save)
+                .map(organizationMapper::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
 }

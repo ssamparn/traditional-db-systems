@@ -43,4 +43,13 @@ public class OrganizationMapper {
         response.setAddress(addressMapper.toAddressResponse(organization.getAddress()));
         return response;
     }
+
+    public Organization updateEntity(Long organizationId, Organization organization, OrganizationRequest request) {
+        organization.setId(organizationId);
+        organization.setName(request.getOrganizationName());
+        organization.setOrgId(request.getOrganizationId());
+        Address address = createAddress(request.getAddress());
+        organization.setAddress(address);
+        return organization;
+    }
 }
