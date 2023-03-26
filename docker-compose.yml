@@ -10,7 +10,9 @@ services:
       - POSTGRES_USER=sashank
       - POSTGRES_PASSWORD=password
 #      - POSTGRES_DB=jdbc_postgresql_book_relations
-      - POSTGRES_DB=jdbc_postgresql_one_two_one_bi_directional_relations
+#      - POSTGRES_DB=jdbc_postgresql_one_two_one_bi_directional_relations
+      - POSTGRES_DB=jdbc_postgresql_one_two_many_bi_directional_relations
+#      - POSTGRES_DB=jdbc_postgresql_many_two_many_bi_directional_relations
     ports:
       - "5432:5432"
     volumes:
