@@ -1,5 +1,6 @@
 package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +24,7 @@ public class Address {
     private String country;
     private String zipcode;
 
-    @OneToOne(targetEntity = Organization.class, mappedBy = "address")
+    @OneToOne(cascade = CascadeType.ALL, targetEntity = Organization.class, mappedBy = "address")
     private Organization organization;
 
 }
