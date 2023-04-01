@@ -14,7 +14,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "roles")
 @Table(name = "roles")
 public class Role {
 
@@ -26,7 +26,7 @@ public class Role {
 
     private String description;
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = User.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "role_id")
+    @OneToMany(targetEntity = User.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "role_id_is_fk_in_user", referencedColumnName = "id")
     private List<User> users;
 }

@@ -3,6 +3,7 @@ package com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.db.repository.UserRepository;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.mapper.UserMapper;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.exception.UserNotFoundException;
+import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.response.RoleUserResponse;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,11 @@ public class UserService {
     public Flux<UserResponse> getAllUsers() {
         return Flux.fromIterable(this.userRepository.findAll())
                 .map(userMapper::toUserResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Flux<RoleUserResponse> getRoleUserInfo() {
+        return Flux.fromIterable(this.userRepository.getJoinInformation())
                 .subscribeOn(Schedulers.boundedElastic());
     }
 }

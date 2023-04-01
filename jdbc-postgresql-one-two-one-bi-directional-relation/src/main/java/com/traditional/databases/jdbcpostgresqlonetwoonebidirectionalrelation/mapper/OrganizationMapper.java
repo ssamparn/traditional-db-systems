@@ -4,7 +4,6 @@ import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity.Organization;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.AddressRequest;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.request.OrganizationRequest;
-import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.response.AddressResponse;
 import com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.web.model.response.OrganizationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

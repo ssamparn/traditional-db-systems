@@ -1,6 +1,7 @@
 package com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.controller;
 
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.service.UserService;
+import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.response.RoleUserResponse;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-public class UserRestController {
+public class UserController {
 
     private final UserService userService;
 
@@ -28,5 +29,10 @@ public class UserRestController {
     @GetMapping("/user/get/all")
     public Flux<UserResponse> getUsers() {
         return userService.getAllUsers();
+    }
+
+    @GetMapping("/role/user/info")
+    public Flux<RoleUserResponse> getRoleUserJoinedResponse() {
+        return userService.getRoleUserInfo();
     }
 }

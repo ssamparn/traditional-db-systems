@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
-public class RoleRestController {
+public class RoleController {
 
     private final RoleService roleService;
 
