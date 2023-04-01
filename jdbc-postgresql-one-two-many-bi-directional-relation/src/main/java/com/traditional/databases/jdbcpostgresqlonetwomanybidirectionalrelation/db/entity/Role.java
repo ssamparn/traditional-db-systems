@@ -27,6 +27,6 @@ public class Role {
     private String description;
 
     @OneToMany(targetEntity = User.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id_fk", referencedColumnName = "id")
+    @JoinColumn(name = "role_id_fk", referencedColumnName = "id")
     private List<User> users;
 }

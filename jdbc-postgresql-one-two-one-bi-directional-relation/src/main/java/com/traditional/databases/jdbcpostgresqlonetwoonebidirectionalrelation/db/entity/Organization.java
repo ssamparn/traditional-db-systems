@@ -24,7 +24,7 @@ public class Organization {
     private String orgId;
 
     @OneToOne(targetEntity = Address.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "address_id_fk", referencedColumnName = "id") // Join Column mapping
+    @JoinColumn(name = "organization_id_fk", referencedColumnName = "id") // Join Column mapping
 //    @JoinTable(name = "organization_address", // Join Table mapping
 //        joinColumns = { @JoinColumn(name = "organization_id") },
 //        inverseJoinColumns = { @JoinColumn(name = "address_id") }
