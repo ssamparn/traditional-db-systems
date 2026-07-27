@@ -6,7 +6,7 @@ database:
   type: postgresql
   host: localhost
   port: 5432
-  username: sashank
+  username: postgres
   password: password
 
 spring:

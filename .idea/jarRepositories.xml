@@ -8,6 +8,16 @@
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
+      <option name="name" value="central" />
+      <option name="url" value="https://nexus3.rabobank.nl/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="NexusCloud" />
+      <option name="name" value="NexusCloud" />
+      <option name="url" value="https://repo.nexuscloud.aws.rabo.cloud/repository/gr-maven2-91/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
       <option name="name" value="Maven Central repository" />
       <option name="url" value="https://repo1.maven.org/maven2" />
     </remote-repository>
@@ -15,6 +25,11 @@
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="snapshots" />
+      <option name="name" value="snapshots" />
+      <option name="url" value="https://nexus3.rabobank.nl/repository/maven-public-snapshots/" />
     </remote-repository>
   </component>
 </project>

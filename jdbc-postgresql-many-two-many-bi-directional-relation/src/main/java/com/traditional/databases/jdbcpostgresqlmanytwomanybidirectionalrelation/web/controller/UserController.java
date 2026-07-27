@@ -1,6 +1,8 @@
 package com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.web.controller;
 
 import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.entity.User;
+import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.repository.UserRepository;
+import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserService userService;
+    private final UserRepository userRepository;
+
     @PostMapping("/user/create")
     public ResponseEntity<Object> createUser(@RequestBody User user) {
         return userService.createUser(user);
@@ -24,9 +29,7 @@ public class UserController {
 
     @GetMapping("/user/details/{id}")
     public User getUser(@PathVariable Long id) {
-        if(userRepository.findById(id).isPresent())
-        return userRepository.findById(id).get();
-    else return  null;
+        return userRepository.findById(id).orElse(null);
     }
 
     @GetMapping("/user/all")

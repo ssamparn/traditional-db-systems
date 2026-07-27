@@ -1,6 +1,8 @@
 package com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.web.controller;
 
 import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.entity.Role;
+import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.repository.RoleRepository;
+import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.List;
 public class RoleController {
 
     private final RoleService roleService;
+    private final RoleRepository roleRepository;
 
     @PostMapping("/role/create")
     public ResponseEntity<Object> createRole(@RequestBody Role role) {
@@ -30,9 +34,7 @@ public class RoleController {
 
     @GetMapping("/role/details/{id}")
     public Role getRole(@PathVariable Long id) {
-        if(roleRepository.findById(id).isPresent())
-        return roleRepository.findById(id).get();
-    else return null;
+        return roleRepository.findById(id).orElse(null);
     }
 
     @GetMapping("/role/all")
