@@ -5,13 +5,67 @@ A multi-module Spring Boot workspace for learning relational database mappings w
 ## Tech baseline
 - Java 25
 - Spring Boot 4.1.0
-- Maven multi-module build with a single parent (`traditional-db-systems/pom.xml`)
+- Maven multi-module build with a single parent in `pom.xml`
+
+## Learning goals
+This repository is organized so you can study each association type in isolation and compare:
+
+- **owning side vs inverse side**
+- **foreign key vs join table**
+- **entity graph synchronization**
+- **DTO responses vs direct entity exposure**
+- **safe cascade usage**
 
 ## Modules
-- `jdbc-postgresql-entity-relations`: entity-first relation mapping examples
-- `jdbc-postgresql-one-two-one-bi-directional-relation`: one-to-one bidirectional mapping
-- `jdbc-postgresql-one-two-many-bi-directional-relation`: one-to-many and many-to-one bidirectional mapping
-- `jdbc-postgresql-many-two-many-bi-directional-relation`: many-to-many bidirectional mapping
+
+### `jdbc-postgresql-entity-relations`
+Focus: a mixed model with `@OneToOne`, `@ManyToMany`, and a self-referencing category tree.
+
+- `Book -> Photo`: one-to-one
+- `Book <-> Author`: many-to-many
+- `Book <-> Category`: many-to-many
+- `Category -> Category`: parent/child hierarchy
+
+### `jdbc-postgresql-one-two-one-bi-directional-relation`
+Focus: classic bidirectional one-to-one.
+
+- `Organization -> Address`
+- Owning side stores the foreign key
+
+### `jdbc-postgresql-one-two-many-bi-directional-relation`
+Focus: canonical bidirectional one-to-many / many-to-one.
+
+- `Role -> users`
+- `User -> role`
+- `User` is the owning side because it contains the foreign key column
+
+### `jdbc-postgresql-many-two-many-bi-directional-relation`
+Focus: bidirectional many-to-many with an explicit join table.
+
+- `User <-> Role`
+- Join table: `users_roles`
+- `User` is the owning side because it declares `@JoinTable`
+
+## Quick mental model
+
+### Owning side
+The owning side is the side that writes the relationship to the database.
+
+- `@ManyToOne` is typically the owning side of a one-to-many relationship.
+- The side with `@JoinColumn` is the owning side in one-to-one.
+- The side with `@JoinTable` is the owning side in many-to-many.
+
+### Inverse side
+The inverse side uses `mappedBy` and mirrors the association for navigation in Java.
+
+### Rule of thumb for bidirectional relations
+Always update **both sides** of the object graph in code.
+
+Examples from this workspace:
+
+- `Role.addUser(user)` also sets `user.setRole(role)`
+- `User.addRole(role)` also adds the user to `role.getUsers()`
+- `Organization.setAddress(address)` also sets `address.setOrganization(organization)`
 
 ## Build and test
 Run from repository root:
@@ -20,15 +74,15 @@ Run from repository root:
 mvn clean test
 ```
 
-Run a module with its Maven wrapper:
+Run a single module:
 
 ```bash
-cd jdbc-postgresql-entity-relations
+cd jdbc-postgresql-one-two-many-bi-directional-relation
 ./mvnw spring-boot:run
 ```
 
-## Why this structure
-- Shared dependency and plugin management is centralized in one parent POM.
-- Module POMs focus only on learning-specific dependencies and behavior.
-- Version drift is minimized across modules, which keeps examples comparable.
+## Notes
+- Shared dependency and plugin management is centralized in the root parent POM.
+- The modules now prefer DTOs for HTTP responses where returning entities directly would create recursion or overexpose graph structure.
+- If Maven dependency resolution fails in your environment, check your JDK truststore, proxy, and Maven certificate settings first.
 
