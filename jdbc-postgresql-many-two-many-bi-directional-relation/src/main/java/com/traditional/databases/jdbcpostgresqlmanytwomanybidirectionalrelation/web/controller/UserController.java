@@ -1,7 +1,6 @@
 package com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.web.controller;
 
 import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.entity.User;
-import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.repository.UserRepository;
 import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,30 +19,31 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
     @PostMapping("/user/create")
-    public ResponseEntity<Object> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
 
     @GetMapping("/user/details/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userRepository.findById(id).orElse(null);
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        return userService.findById(id)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/all")
     public List<User> getUsers() {
-        return userRepository.findAll();
+        return userService.findAll();
     }
 
     @PutMapping("/user/update/{id}")
-    public ResponseEntity<Object> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         return userService.updateUser(user, id);
     }
 
     @DeleteMapping("user/delete/{id}")
-    public ResponseEntity<Object> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
 

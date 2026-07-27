@@ -1,7 +1,6 @@
 package com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.web.controller;
 
 import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.entity.Role;
-import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.db.repository.RoleRepository;
 import com.traditional.databases.jdbcpostgresqlmanytwomanybidirectionalrelation.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,31 +19,31 @@ import java.util.List;
 public class RoleController {
 
     private final RoleService roleService;
-    private final RoleRepository roleRepository;
 
     @PostMapping("/role/create")
-    public ResponseEntity<Object> createRole(@RequestBody Role role) {
+    public ResponseEntity<Role> createRole(@RequestBody Role role) {
         return  roleService.addRole(role);
     }
 
     @DeleteMapping("/role/delete/{id}")
-    public ResponseEntity<Object> deleteRole(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
         return roleService.deleteRole(id);
     }
 
     @GetMapping("/role/details/{id}")
-    public Role getRole(@PathVariable Long id) {
-        return roleRepository.findById(id).orElse(null);
+    public ResponseEntity<Role> getRole(@PathVariable Long id) {
+        return roleService.findById(id)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/role/all")
     public List<Role> getRoles() {
-        return roleRepository.findAll();
+        return roleService.findAll();
     }
 
     @PutMapping("/role/update/{id}")
-    public ResponseEntity<Object> updateRole(@PathVariable Long id, @RequestBody Role role) {
+    public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role role) {
         return roleService.updateRole(id, role);
     }
-
 }

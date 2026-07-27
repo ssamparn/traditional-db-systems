@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,26 +16,29 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public ResponseEntity<Object> createUser(User user) {
+    public ResponseEntity<User> createUser(User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userRepository.save(user));
     }
 
-    public ResponseEntity<Object> updateUser(User user, Long id) {
+    public ResponseEntity<User> updateUser(User user, Long id) {
         return userRepository.findById(id)
-            .<ResponseEntity<Object>>map(existing -> {
+            .map(existing -> {
                 user.setId(existing.getId());
                 return ResponseEntity.ok(userRepository.save(user));
             })
-            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("User not found with id: " + id));
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<Object> deleteUser(Long id) {
+    public ResponseEntity<Void> deleteUser(Long id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with id: " + id);
+        return ResponseEntity.notFound().build();
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
     public Optional<User> findById(Long id) {

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,26 +16,29 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    public ResponseEntity<Object> addRole(Role role) {
+    public ResponseEntity<Role> addRole(Role role) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleRepository.save(role));
     }
 
-    public ResponseEntity<Object> updateRole(Long id, Role role) {
+    public ResponseEntity<Role> updateRole(Long id, Role role) {
         return roleRepository.findById(id)
-            .<ResponseEntity<Object>>map(existing -> {
+            .map(existing -> {
                 role.setId(existing.getId());
                 return ResponseEntity.ok(roleRepository.save(role));
             })
-            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Role not found with id: " + id));
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public ResponseEntity<Object> deleteRole(Long id) {
+    public ResponseEntity<Void> deleteRole(Long id) {
         if (roleRepository.existsById(id)) {
             roleRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not found with id: " + id);
+        return ResponseEntity.notFound().build();
+    }
+
+    public List<Role> findAll() {
+        return roleRepository.findAll();
     }
 
     public Optional<Role> findById(Long id) {
