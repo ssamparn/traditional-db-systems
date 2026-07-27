@@ -1,35 +1,27 @@
----
-version: "3.5"
-
 services:
   postgres:
+    image: postgres:17-bookworm
     container_name: postgres
-    image: postgres:13.2
-    restart: always
-    environment:
-      - POSTGRES_USER=sashank
-      - POSTGRES_PASSWORD=password
-#      - POSTGRES_DB=jdbc_postgresql_book_relations
-#      - POSTGRES_DB=jdbc_postgresql_one_two_one_bi_directional_relations
-      - POSTGRES_DB=jdbc_postgresql_one_two_many_bi_directional_relations
-#      - POSTGRES_DB=jdbc_postgresql_many_two_many_bi_directional_relations
+    restart: unless-stopped
     ports:
       - "5432:5432"
-    volumes:
-      - postgres-data:/data/db
-
-  pgadmin:
-    container_name: pgadmin4
-    image: dpage/pgadmin4
-    restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: password
-    ports:
-      - "5050:80"
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: jdbc_postgresql_book_relations
+#      POSTGRES_DB: jdbc_postgresql_one_two_one_bi_directional_relations
+#      POSTGRES_DB: jdbc_postgresql_one_two_many_bi_directional_relations
+#      POSTGRES_DB: jdbc_postgresql_many_two_many_bi_directional_relations
+      TZ: UTC
     volumes:
-      - pgadmin-data:/data/pgadmin
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
 volumes:
   postgres-data:
-  pgadmin-data:
+    name: postgres-data
