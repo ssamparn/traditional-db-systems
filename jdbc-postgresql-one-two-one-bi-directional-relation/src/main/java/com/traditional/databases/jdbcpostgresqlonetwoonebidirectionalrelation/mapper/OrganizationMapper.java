@@ -19,11 +19,16 @@ public class OrganizationMapper {
         entity.setName(request.getOrganizationName());
         entity.setOrgId(request.getOrganizationId());
         Address address = createAddress(request.getAddress());
-        entity.setAddress(address);
+        if (address != null) {
+            entity.setAddress(address);
+        }
         return entity;
     }
 
     private Address createAddress(AddressRequest request) {
+        if (request == null) {
+            return null;
+        }
         Address entity = new Address();
         entity.setBuilding(request.getBuilding());
         entity.setStreet(request.getStreet());
@@ -48,7 +53,9 @@ public class OrganizationMapper {
         organization.setName(request.getOrganizationName());
         organization.setOrgId(request.getOrganizationId());
         Address address = createAddress(request.getAddress());
-        organization.setAddress(address);
+        if (address != null) {
+            organization.setAddress(address);
+        }
         return organization;
     }
 }

@@ -6,13 +6,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "organizations")
 public class Organization {
@@ -23,13 +25,14 @@ public class Organization {
     private String name;
     private String orgId;
 
-    @OneToOne(targetEntity = Address.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "organization_id_fk", referencedColumnName = "id") // Join Column mapping
-//    @JoinTable(name = "organization_address", // Join Table mapping
-//        joinColumns = { @JoinColumn(name = "organization_id") },
-//        inverseJoinColumns = { @JoinColumn(name = "address_id") }
-//    )
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    @JoinColumn(name = "address_id_fk", referencedColumnName = "id", nullable = false, unique = true)
     private Address address;
 
-    // Note: With @JoinColumn a new column will be created and in @JoinTable a new table will be created
+    public void setAddress(Address address) {
+        this.address = address;
+        if (address != null && address.getOrganization() != this) {
+            address.setOrganization(this);
+        }
+    }
 }

@@ -9,6 +9,7 @@ import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.w
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +24,14 @@ public class RoleMapper {
         role.setName(request.getName());
         role.setDescription(request.getDescription());
         List<User> users = createUsers(request.getUsers());
-        role.setUsers(users);
+        users.forEach(role::addUser);
         return role;
     }
 
     private List<User> createUsers(List<UserRequest> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
         return users.stream()
                 .map(userMapper::toUserEntity)
                 .collect(Collectors.toList());
@@ -43,6 +47,9 @@ public class RoleMapper {
     }
 
     private List<UserResponse> createUserResponse(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
         return users.stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());

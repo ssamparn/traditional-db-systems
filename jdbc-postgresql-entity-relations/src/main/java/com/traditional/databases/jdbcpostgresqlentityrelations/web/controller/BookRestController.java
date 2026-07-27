@@ -1,8 +1,8 @@
 package com.traditional.databases.jdbcpostgresqlentityrelations.web.controller;
 
-import com.traditional.databases.jdbcpostgresqlentityrelations.db.entity.Book;
 import com.traditional.databases.jdbcpostgresqlentityrelations.service.BookService;
 import com.traditional.databases.jdbcpostgresqlentityrelations.web.model.BookRequest;
+import com.traditional.databases.jdbcpostgresqlentityrelations.web.model.BookResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,10 +22,10 @@ public class BookRestController {
     private final BookService bookService;
 
     @PostMapping("/book/create")
-    public Mono<ResponseEntity<Book>> createBook(@RequestBody Mono<BookRequest> bookRequestMono) {
+    public Mono<ResponseEntity<BookResponse>> createBook(@RequestBody Mono<BookRequest> bookRequestMono) {
         return bookService.createNewBook(bookRequestMono)
                 .map(book -> new ResponseEntity<>(book, HttpStatus.CREATED))
-                .doOnNext(book -> log.info("created new book: {}", book));
+                .doOnNext(book -> log.info("created new book with id: {}", book.getBody() != null ? book.getBody().getId() : null));
 
     }
 }

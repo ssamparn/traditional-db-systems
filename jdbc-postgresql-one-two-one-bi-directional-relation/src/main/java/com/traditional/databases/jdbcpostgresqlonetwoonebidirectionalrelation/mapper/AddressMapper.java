@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AddressMapper {
     public AddressResponse toAddressResponse(Address address) {
+        if (address == null) {
+            return null;
+        }
         AddressResponse response = new AddressResponse();
         response.setBuilding(address.getBuilding());
         response.setCity(address.getCity());

@@ -7,9 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "photo")
 public class Photo {
@@ -31,4 +33,11 @@ public class Photo {
     // bi-directional
     @OneToOne(mappedBy = "photo")
     private Book book;
+
+    public void setBook(Book book) {
+        this.book = book;
+        if (book != null && book.getPhoto() != this) {
+            book.setPhoto(this);
+        }
+    }
 }

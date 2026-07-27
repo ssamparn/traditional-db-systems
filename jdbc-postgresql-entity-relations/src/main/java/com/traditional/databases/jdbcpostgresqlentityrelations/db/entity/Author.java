@@ -7,13 +7,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "author")
 @NoArgsConstructor
@@ -33,5 +36,5 @@ public class Author {
     private Date birthDate;
 
     @ManyToMany(mappedBy = "authors")
-    private Collection<Book> books;
+    private Collection<Book> books = new ArrayList<>();
 }

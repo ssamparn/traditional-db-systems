@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT new com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.response.RoleUserResponse(r.id, r.name, u.id, u.firstName, u.lastName, u.email) from roles r, users u join r.users")
+    @Query("SELECT new com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.response.RoleUserResponse(r.id, r.name, u.id, u.firstName, u.lastName, u.email) FROM roles r JOIN r.users u")
     List<RoleUserResponse> getJoinInformation();
 }

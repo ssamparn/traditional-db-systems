@@ -2,6 +2,7 @@ package com.traditional.databases.jdbcpostgresqlentityrelations.mapper;
 
 import com.traditional.databases.jdbcpostgresqlentityrelations.db.entity.Book;
 import com.traditional.databases.jdbcpostgresqlentityrelations.web.model.BookRequest;
+import com.traditional.databases.jdbcpostgresqlentityrelations.web.model.BookResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,17 @@ public class BookMapper {
         book.setRating(request.getRating());
         book.setPublishedDate(request.getPublishedDate());
         return book;
+    }
+
+    public BookResponse toBookResponse(Book entity) {
+        return BookResponse.of(
+            entity.getId(),
+            entity.getTitle(),
+            entity.getIsbn(),
+            entity.getTotalPages(),
+            entity.getRating(),
+            entity.getPublishedDate()
+        );
     }
 
 }

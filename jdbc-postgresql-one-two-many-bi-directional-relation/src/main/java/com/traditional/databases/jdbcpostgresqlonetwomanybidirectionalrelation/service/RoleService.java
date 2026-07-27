@@ -2,7 +2,6 @@ package com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.
 
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.db.entity.Role;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.db.repository.RoleRepository;
-import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.db.repository.UserRepository;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.mapper.RoleMapper;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.exception.RoleNotFoundException;
 import com.traditional.databases.jdbcpostgresqlonetwomanybidirectionalrelation.web.model.request.RoleRequest;
@@ -20,7 +19,6 @@ public class RoleService {
 
     private final RoleMapper roleMapper;
     private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
 
     @Transactional
     public Mono<RoleResponse> createNewRole(final Mono<RoleRequest> roleMono) {

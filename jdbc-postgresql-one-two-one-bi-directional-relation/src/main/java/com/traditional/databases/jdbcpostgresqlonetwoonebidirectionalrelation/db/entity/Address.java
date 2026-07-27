@@ -1,15 +1,18 @@
 package com.traditional.databases.jdbcpostgresqlonetwoonebidirectionalrelation.db.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "addresses")
 public class Address {
@@ -24,7 +27,13 @@ public class Address {
     private String country;
     private String zipcode;
 
-    @OneToOne(cascade = CascadeType.ALL, targetEntity = Organization.class, mappedBy = "address")
+    @OneToOne(mappedBy = "address")
     private Organization organization;
 
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
+        if (organization != null && organization.getAddress() != this) {
+            organization.setAddress(this);
+        }
+    }
 }
