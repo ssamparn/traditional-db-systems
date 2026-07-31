@@ -60,6 +60,14 @@ Focus: bidirectional many-to-many with an explicit join table.
 - Join table: `students_courses`
 - `Student` is the owning side because it declares `@JoinTable`
 
+### `jdbc-many-to-many-with-join-entity`
+Focus: many-to-many with **business meaning** represented as a first-class association entity.
+
+- `Student -> Enrollment <- Course`
+- `Enrollment` stores `enrolledAt`, `status`, `grade`, `createdBy`
+- Unique association guard for `(student, course)`
+- Demonstrates why real systems often promote pure join tables into explicit entities
+
 ## Quick mental model
 
 ### Owning side
@@ -68,6 +76,7 @@ The owning side is the side that writes the relationship to the database.
 - `@ManyToOne` is typically the owning side of a one-to-many relationship.
 - The side with `@JoinColumn` is the owning side in one-to-one.
 - The side with `@JoinTable` is the owning side in many-to-many.
+- If the relationship itself has behavior or attributes, model a dedicated join entity instead of `@ManyToMany`.
 
 ### Inverse side
 The inverse side uses `mappedBy` and mirrors the association for navigation in Java.

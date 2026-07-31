@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: jdbc-many-to-many-with-join-entity
+  profiles:
+    default: postgres
+
+server:
+  port: 8084
