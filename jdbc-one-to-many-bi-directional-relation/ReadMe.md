@@ -16,7 +16,14 @@ Use bidirectional one-to-many when:
 - you want explicit service-level control over lifecycle rules (replace, reassign, delete)
 
 ## When to use bidirectional one-to-many or many-to-one?
-Missing
+
+Use this mapping when both parent and child navigations are meaningful in domain behavior:
+
+- parent aggregate operations are central (for example: add/remove many children in one transaction)
+- child workflows also need a direct link to parent ownership/authorization
+- you need lifecycle control from parent (`orphanRemoval`, cascade policies) while still querying from child perspective
+
+Prefer unidirectional one-to-many or plain many-to-one when reverse traversal does not add business value.
 
 ## Common business scenarios
 
@@ -24,6 +31,20 @@ Missing
 - `Account <-> Transaction`
 - `Course <-> Enrollment`
 - `Project <-> Task`
+
+## Interview perspective: when to choose uni vs bi
+
+Use **bidirectional** when:
+
+- both traversals are required in core business logic
+- parent-side lifecycle control over children is important
+- you can enforce graph synchronization helpers reliably
+
+Use **unidirectional** when:
+
+- only one side is queried most of the time
+- you want simpler entity maintenance and lower graph-coupling risk
+- reverse association would only add accidental complexity
 
 ## Mapping in this module
 
@@ -132,6 +153,25 @@ users
 
 No join table is required for one-to-many.
 
+## SQL checks to run
+
+```sql
+-- 1) Verify roles and users shape
+select column_name, is_nullable
+from information_schema.columns
+where table_name in ('roles', 'users')
+order by table_name, ordinal_position;
+
+-- 2) Verify FK from users to roles
+select conname, contype
+from pg_constraint
+where conrelid = 'users'::regclass;
+
+-- 3) Verify relationship values
+select id, name, description from roles;
+select id, first_name, last_name, email, role_id_fk from users;
+```
+
 ## Test taxonomy in this module
 
 - **Controller integration**: create/validation/reassign flow verification
@@ -169,3 +209,12 @@ DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_many_bi_directional_relations
 - **Why helper methods?** To avoid half-linked in-memory graphs and FK anomalies.
 - **Why orphanRemoval?** To automatically clean removed children.
 - **Why DTOs?** To prevent entity leakage and recursion issues at API boundaries.
+
+## Anti-patterns to avoid
+
+- Updating only inverse collection (`Role.users`) without setting owner side (`User.role`).
+- Exposing JPA entities directly from controller responses.
+- Treating lazy proxy exceptions as a reason to switch everything to eager fetch.
+- Replacing child collections without explicit orphan/removal intent.
+- Mixing transaction logic into controllers instead of keeping it in services.
+
