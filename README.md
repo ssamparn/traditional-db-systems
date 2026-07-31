@@ -46,6 +46,13 @@ Focus: canonical bidirectional one-to-many / many-to-one.
 - `User -> role`
 - `User` is the owning side because it contains the foreign key column
 
+### `jdbc-one-to-many-uni-directional-relation`
+Focus: owner-only one-to-many where child has no reverse navigation.
+
+- `Team -> members`
+- No reverse field from `Member` to `Team`
+- Useful when parent-side aggregate operations matter, but child-to-parent traversal does not
+
 ### `jdbc-many-to-many-bi-directional-relation`
 Focus: bidirectional many-to-many with an explicit join table.
 
@@ -71,6 +78,7 @@ Always update **both sides** of the object graph in code.
 Examples from this workspace:
 
 - `Role.addUser(user)` also sets `user.setRole(role)`
+- `Team.addMember(member)` updates only owner collection because the model is intentionally unidirectional
 - `User.addRole(role)` also adds the user to `role.getUsers()`
 - `Organization.setAddress(address)` also sets `address.setOrganization(organization)`
 
