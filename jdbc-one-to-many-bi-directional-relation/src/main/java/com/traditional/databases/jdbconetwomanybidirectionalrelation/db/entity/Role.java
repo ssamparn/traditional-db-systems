@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @Entity(name = "roles")
 @Table(name = "roles")
@@ -27,9 +26,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @Column(nullable = false, unique = true, length = 80)
     private String name;
 
+    @Setter
     @Column(nullable = false, length = 240)
     private String description;
 
@@ -41,12 +42,21 @@ public class Role {
             return;
         }
         user.setRole(this);
+
+        if (!users.contains(user)) {
+            users.add(user);
+        }
     }
 
     public void removeUser(User user) {
         if (user == null) {
             return;
         }
-        user.setRole(null);
+
+        if (user.getRole() == this) {
+            user.setRole(null);
+        }
+
+        users.remove(user);
     }
 }

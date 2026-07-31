@@ -51,16 +51,31 @@ public class User {
         Role previousRole = this.role;
         this.role = role;
 
-        if (previousRole != null && isUsersCollectionLoaded(previousRole)) {
-            previousRole.getUsers().remove(this);
-        }
+        detachFromLoadedRole(previousRole);
+        attachToLoadedRole(role);
+    }
 
-        if (role != null && isUsersCollectionLoaded(role) && !role.getUsers().contains(this)) {
-            role.getUsers().add(this);
+    private void detachFromLoadedRole(Role candidateRole) {
+        if (isUsersCollectionNotLoaded(candidateRole)) {
+            return;
+        }
+        candidateRole.getUsers().remove(this);
+    }
+
+    private void attachToLoadedRole(Role candidateRole) {
+        if (isUsersCollectionNotLoaded(candidateRole)) {
+            return;
+        }
+        if (!candidateRole.getUsers().contains(this)) {
+            candidateRole.getUsers().add(this);
         }
     }
 
-    private boolean isUsersCollectionLoaded(Role role) {
-        return Persistence.getPersistenceUtil().isLoaded(role, "users");
+    private boolean isUsersCollectionNotLoaded(Role candidateRole) {
+        if (candidateRole == null) {
+            return true;
+        }
+        return !Persistence.getPersistenceUtil().isLoaded(candidateRole)
+                || !Persistence.getPersistenceUtil().isLoaded(candidateRole, "users");
     }
 }
