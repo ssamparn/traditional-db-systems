@@ -1,91 +1,190 @@
-# Many-to-Many Learning Guide
+# Many-to-Many Bidirectional Relation
 
-This module demonstrates a bidirectional many-to-many relation between:
+This module demonstrates a production-style **bidirectional many-to-many** model between:
 
-- `User`
-- `Role`
+- `Student` (owning side)
+- `Course` (inverse side)
 
-## What to learn here
+It is intentionally designed for learning join-table ownership, bidirectional graph synchronization, relation lifecycle operations, and DTO-safe APIs.
 
-### Owning side
-`User` is the owning side because it declares:
+## Why this relation matters (architect point of view)
 
-- `@ManyToMany`
-- `@JoinTable(name = "users_roles")`
+Use many-to-many when both domains independently exist and can be linked in multiple combinations.
 
-That means the relationship is persisted through the join table declared on `User`.
+In this module:
 
-### Inverse side
-`Role.users` is the inverse side because it uses:
+- one `Student` can enroll in multiple `Course`
+- one `Course` can contain multiple `Student`
 
-- `mappedBy = "roles"`
+## When to use bidirectional many-to-many?
 
-## Expected table shape
+Use bidirectional mapping when both traversals are valuable in business logic:
+
+- `Student -> courses` for enrollment and planning workflows
+- `Course -> students` for roster and scheduling workflows
+
+If reverse traversal is never used, prefer unidirectional mapping to reduce graph complexity.
+
+## Common business scenarios
+
+- `Student <-> Course`
+- `Student <-> Course`
+- `Doctor <-> Specialty`
+- `Employee <-> Skill`
+
+## Interview perspective: when to choose uni vs bi
+
+Use **bidirectional** when:
+
+- both side traversals are domain requirements
+- audits/reporting need reverse lookup
+- helper methods can consistently maintain both sides
+
+Use **unidirectional** when:
+
+- only one direction is queried by business flows
+- reverse side adds complexity without value
+
+## Mapping in this module
+
+### Owning side (`Student`)
+
+```java
+@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+@JoinTable(
+    name = "students_courses",
+    joinColumns = @JoinColumn(name = "student_id_fk"),
+    inverseJoinColumns = @JoinColumn(name = "course_id_fk")
+)
+private List<Course> courses;
+```
+
+- owning side writes join-table rows
+- relation updates should be driven through owner helpers
+
+### Inverse side (`Course`)
+
+```java
+@ManyToMany(fetch = FetchType.LAZY, mappedBy = "courses")
+private List<Student> students;
+```
+
+### Graph synchronization rule
+
+Entity helpers ensure both sides stay in-sync in memory:
+
+- `student.addCourse(course)` updates `course.students`
+- `course.addStudent(student)` updates `student.courses`
+
+## API contract
+
+### Student APIs
+
+- `POST /api/v1/student/create`
+- `GET /api/v1/student/get/all`
+- `GET /api/v1/student/get/{studentId}`
+- `PUT /api/v1/student/update/{studentId}`
+- `DELETE /api/v1/student/delete/{studentId}`
+
+### Course APIs
+
+- `POST /api/v1/course/create`
+- `GET /api/v1/course/get/all`
+- `GET /api/v1/course/get/{courseId}`
+- `PUT /api/v1/course/update/{courseId}`
+- `DELETE /api/v1/course/delete/{courseId}`
+
+## Validation and error contract
+
+Service validators enforce required fields and length constraints:
+
+- `StudentRequestValidator`
+- `CourseRequestValidator`
+
+Failures are emitted through `GlobalExceptionHandler`:
+
+- `400` validation/argument errors
+- `404` missing student/course
+- `409` DB uniqueness/conflict errors
+
+## Exact table behavior
+
+Expected schema shape:
 
 ```text
-users
-  - id
-  - first_name
-  - last_name
-  - mobile
-  - email
+students
+  - id (PK)
+  - first_name (NOT NULL)
+  - last_name (NOT NULL)
+  - mobile (NOT NULL)
+  - email (UNIQUE, NOT NULL)
 
-roles
-  - id
-  - name
-  - description
+courses
+  - id (PK)
+  - name (UNIQUE, NOT NULL)
+  - description (NOT NULL)
 
-users_roles
-  - user_id_fk
-  - role_id_fk
+students_courses
+  - student_id_fk (FK -> students.id)
+  - course_id_fk (FK -> courses.id)
 ```
 
-## Why a join table is required
-A many-to-many relation cannot be represented by a single foreign key column on either side without losing multiplicity.
-
-So JPA creates and manages a join table:
-
-- one user can have many roles
-- one role can belong to many users
-
-## Object graph rule
-This module now keeps both sides synchronized:
-
-- `user.addRole(role)` also updates `role.users`
-- `role.addUser(user)` also updates `user.roles`
-
-This matters when you inspect the graph in memory before saving.
-
-## DTO usage
-The API now returns cycle-safe DTOs instead of JPA entities:
-
-- `UserResponse`
-- `RoleResponse`
-- `UserSummaryResponse`
-- `RoleSummaryResponse`
-
-This avoids recursion and makes the response payload easier to understand.
-
-## Quick SQL checks
+## SQL checks to run
 
 ```sql
-select * from users;
-select * from roles;
-select * from users_roles;
+-- 1) Verify base entities
+select id, first_name, last_name, email from students;
+select id, name, description from courses;
+
+-- 2) Verify join-table rows
+select student_id_fk, course_id_fk from students_courses;
+
+-- 3) Verify constraints
+select conname, contype
+from pg_constraint
+where conrelid in ('students'::regclass, 'courses'::regclass, 'students_courses'::regclass);
 ```
 
-## Suggested experiments
+## Test taxonomy in this module
 
-1. Create a few roles.
-2. Create a user with multiple `roleIds`.
-3. Query `users_roles` and inspect how one user maps to multiple role rows.
-4. Update the user with a different set of `roleIds`.
-5. Observe how the join table changes.
+- **Controller integration**: create/update/delete + validation and not-found paths
+- **Relation integration**: owning/inverse side synchronization before flush and after persist
+- **Association lifecycle integration**: deleting/rewiring links should preserve independent entities
+- **In-memory relation tests**: helper methods keep object graph consistent before persistence
 
-## Architecture guardrails
+## Runtime profile strategy
 
-- Keep relation mutation logic in service methods, not controllers.
-- Keep both sides synchronized in entity helper methods before persistence.
-- Return DTOs from API boundaries to avoid recursive graph exposure.
-- If using Reactor types with JPA, execute blocking repository calls on `boundedElastic`.
-- Keep security and schema auto-create settings as learning defaults only.
+- `application.yml` sets default profile to `postgres`
+- `application-postgres.yml` is runtime PostgreSQL config
+- `application-test.yml` is H2 integration-test config
+- Maven Surefire sets `spring.profiles.active=test` during tests
+
+## Run app with Docker PostgreSQL
+
+```bash
+cd /Users/sashank/Personal/projects/backend/traditional-db-systems
+POSTGRES_USER=postgres POSTGRES_PASSWORD=password docker compose up -d postgres
+```
+
+```bash
+docker exec -it postgres psql -U postgres -c "CREATE DATABASE jdbc_many_to_many_bi_directional_relations;"
+```
+
+```bash
+cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-many-to-many-bi-directional-relation
+DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_many_to_many_bi_directional_relations DB_USERNAME=postgres DB_PASSWORD=password ./mvnw spring-boot:run
+```
+
+## Interview-ready quick answers
+
+- **Why join table in many-to-many?** Neither side can hold a single FK without losing multiplicity.
+- **Who owns bidirectional many-to-many?** Side with `@JoinTable` (`Student`).
+- **Why sync helpers?** Prevent half-linked in-memory graphs before persistence.
+- **Why DTOs?** Avoid recursive entity serialization and keep API contracts stable.
+
+## Anti-patterns to avoid
+
+- Updating only one side of the relation and assuming JPA will infer the rest.
+- Using `CascadeType.REMOVE` in many-to-many and accidentally deleting shared entities.
+- Returning entities directly from controllers.
+- Switching all relations to eager fetch to hide lazy-loading design issues.

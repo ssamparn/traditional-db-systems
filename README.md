@@ -56,9 +56,9 @@ Focus: owner-only one-to-many where child has no reverse navigation.
 ### `jdbc-many-to-many-bi-directional-relation`
 Focus: bidirectional many-to-many with an explicit join table.
 
-- `User <-> Role`
-- Join table: `users_roles`
-- `User` is the owning side because it declares `@JoinTable`
+- `Student <-> Course`
+- Join table: `students_courses`
+- `Student` is the owning side because it declares `@JoinTable`
 
 ## Quick mental model
 

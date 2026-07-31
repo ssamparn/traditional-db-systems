@@ -1,15 +1,18 @@
-package com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response;
+package com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleSummaryResponse {
-    private Long id;
+public class CourseRequest {
     private String name;
     private String description;
+    private List<Long> studentIds;
 }
+
 

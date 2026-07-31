@@ -9,12 +9,13 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class StudentResponse {
     private Long id;
     private String firstName;
     private String lastName;
     private String mobile;
     private String email;
-    private List<RoleSummaryResponse> roles;
+    private List<CourseSummaryResponse> courses;
 }
+
 

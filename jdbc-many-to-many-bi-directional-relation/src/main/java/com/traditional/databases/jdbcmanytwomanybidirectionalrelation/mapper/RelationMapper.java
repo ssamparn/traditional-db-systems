@@ -1,13 +1,13 @@
 package com.traditional.databases.jdbcmanytwomanybidirectionalrelation.mapper;
 
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.db.entity.Role;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.db.entity.User;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.request.RoleRequest;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.request.UserRequest;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.RoleResponse;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.RoleSummaryResponse;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.UserResponse;
-import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.UserSummaryResponse;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.db.entity.Course;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.db.entity.Student;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.request.CourseRequest;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.request.StudentRequest;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.CourseResponse;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.CourseSummaryResponse;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.StudentResponse;
+import com.traditional.databases.jdbcmanytwomanybidirectionalrelation.web.model.response.StudentSummaryResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,59 +15,59 @@ import java.util.List;
 @Component
 public class RelationMapper {
 
-    public User toUserEntity(UserRequest request) {
-        User user = new User();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setMobile(request.getMobile());
-        user.setEmail(request.getEmail());
-        return user;
+    public Student toStudentEntity(StudentRequest request) {
+        Student student = new Student();
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setMobile(request.getMobile());
+        student.setEmail(request.getEmail());
+        return student;
     }
 
-    public Role toRoleEntity(RoleRequest request) {
-        Role role = new Role();
-        role.setName(request.getName());
-        role.setDescription(request.getDescription());
-        return role;
+    public Course toCourseEntity(CourseRequest request) {
+        Course course = new Course();
+        course.setName(request.getName());
+        course.setDescription(request.getDescription());
+        return course;
     }
 
-    public void updateUserEntity(User user, UserRequest request) {
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setMobile(request.getMobile());
-        user.setEmail(request.getEmail());
+    public void updateStudentEntity(Student student, StudentRequest request) {
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setMobile(request.getMobile());
+        student.setEmail(request.getEmail());
     }
 
-    public void updateRoleEntity(Role role, RoleRequest request) {
-        role.setName(request.getName());
-        role.setDescription(request.getDescription());
+    public void updateCourseEntity(Course course, CourseRequest request) {
+        course.setName(request.getName());
+        course.setDescription(request.getDescription());
     }
 
-    public UserResponse toUserResponse(User user) {
-        List<RoleSummaryResponse> roles = user.getRoles().stream()
-            .map(role -> new RoleSummaryResponse(role.getId(), role.getName(), role.getDescription()))
+    public StudentResponse toStudentResponse(Student student) {
+        List<CourseSummaryResponse> courses = student.getCourses().stream()
+            .map(course -> new CourseSummaryResponse(course.getId(), course.getName(), course.getDescription()))
             .toList();
 
-        return new UserResponse(
-            user.getId(),
-            user.getFirstName(),
-            user.getLastName(),
-            user.getMobile(),
-            user.getEmail(),
-            roles
+        return new StudentResponse(
+            student.getId(),
+            student.getFirstName(),
+            student.getLastName(),
+            student.getMobile(),
+            student.getEmail(),
+            courses
         );
     }
 
-    public RoleResponse toRoleResponse(Role role) {
-        List<UserSummaryResponse> users = role.getUsers().stream()
-            .map(user -> new UserSummaryResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()))
+    public CourseResponse toCourseResponse(Course course) {
+        List<StudentSummaryResponse> students = course.getStudents().stream()
+            .map(student -> new StudentSummaryResponse(student.getId(), student.getFirstName(), student.getLastName(), student.getEmail()))
             .toList();
 
-        return new RoleResponse(
-            role.getId(),
-            role.getName(),
-            role.getDescription(),
-            users
+        return new CourseResponse(
+            course.getId(),
+            course.getName(),
+            course.getDescription(),
+            students
         );
     }
 }
