@@ -1,4 +1,4 @@
-package com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation;
+package com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation.web.controller;
 
 import com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation.db.repository.AddressRepository;
 import com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation.db.repository.OrganizationRepository;

@@ -1,4 +1,4 @@
-# One-to-One Bidirectional Relation (Learning + Interview Guide)
+# One-to-One Bidirectional Relation
 
 This module demonstrates a production-style **bidirectional one-to-one** between:
 
@@ -132,12 +132,6 @@ Because owner uses `orphanRemoval = true`:
 - request validation test (`400` on invalid payload)
 - create/read response path test
 - orphan replacement test (old address row is deleted after update)
-
-Run module tests:
-
-```bash
-./mvnw -Dspring.profiles.active=test test
-```
 
 ## Runtime profile strategy
 

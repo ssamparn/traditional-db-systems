@@ -1,4 +1,4 @@
-package com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation;
+package com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation.entity.orphanhandling;
 
 import com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation.db.entity.Address;
 import com.traditional.databases.jdbcpostgresqlonetoonebidirectionalrelation.db.entity.Organization;
