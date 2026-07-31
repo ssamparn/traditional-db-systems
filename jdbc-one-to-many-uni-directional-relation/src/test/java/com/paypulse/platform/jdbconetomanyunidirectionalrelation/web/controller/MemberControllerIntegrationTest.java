@@ -336,6 +336,93 @@ class MemberControllerIntegrationTest {
                 .jsonPath("$[0].memberId").isNumber();
     }
 
+    @Test
+    void createMember_withInvalidEmail_shouldReturnBadRequest() {
+        Team team = createTeam("TEAM-INV-EMAIL", "Invalid Email Team");
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Ari", "Vale", "invalid-email", "9092000012"))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("member.email must be a valid email address");
+    }
+
+    @Test
+    void createMember_withInvalidMobileLength_shouldReturnBadRequest() {
+        Team team = createTeam("TEAM-INV-MOB", "Invalid Mobile Team");
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Ari", "Vale", "ari.mobile@example.com", "123456789012345678901"))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("member.mobile must be at most 20 characters");
+    }
+
+    @Test
+    void updateMember_withInvalidMobileLength_shouldReturnBadRequestAndKeepRecordUnchanged() {
+        Team team = createTeam("TEAM-UPD-INV", "Update Invalid Team");
+
+        Long[] memberIdHolder = new Long[1];
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Mia", "Stone", "mia.mobile.before@example.com", "9092000013"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> memberIdHolder[0] = ((Number) id).longValue());
+
+        webTestClient.put()
+                .uri("/api/v1/member/update/{memberId}", memberIdHolder[0])
+                .bodyValue(new MemberRequest("Mia", "Stone", "mia.mobile.after@example.com", "123456789012345678901"))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("member.mobile must be at most 20 characters");
+
+        Member unchanged = memberRepository.findById(memberIdHolder[0]).orElseThrow();
+        assertThat(unchanged.getEmail()).isEqualTo("mia.mobile.before@example.com");
+        assertThat(unchanged.getMobile()).isEqualTo("9092000013");
+    }
+
+    @Test
+    void reassignMember_toSameTeam_shouldRemainStableAndReturnOk() {
+        Team team = createTeam("TEAM-SAME", "Same Team");
+
+        Long[] memberIdHolder = new Long[1];
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Ria", "Khan", "ria.same@example.com", "9092000014"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> memberIdHolder[0] = ((Number) id).longValue());
+
+        webTestClient.put()
+                .uri("/api/v1/member/reassign/{memberId}/team/{teamId}", memberIdHolder[0], team.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(memberIdHolder[0])
+                .jsonPath("$.teamId").isEqualTo(team.getId());
+
+        Team reloadedTeam = teamRepository.findByIdWithMembers(team.getId()).orElseThrow();
+        assertThat(reloadedTeam.getMembers()).extracting(Member::getId).contains(memberIdHolder[0]);
+    }
+
+    @Test
+    void getTeamMemberInfo_whenNoData_shouldReturnEmptyArray() {
+        webTestClient.get()
+                .uri("/api/v1/team/member/info")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(0);
+    }
+
     private Team createTeam(String code, String name) {
         Team team = new Team();
         team.setTeamCode(code);

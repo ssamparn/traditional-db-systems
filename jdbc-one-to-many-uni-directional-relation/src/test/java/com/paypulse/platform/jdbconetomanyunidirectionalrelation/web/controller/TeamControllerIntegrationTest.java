@@ -331,5 +331,77 @@ class TeamControllerIntegrationTest {
         assertThat(teamRepository.count()).isEqualTo(1L);
         assertThat(memberRepository.count()).isEqualTo(1L);
     }
+
+    @Test
+    void createTeam_withDuplicateMemberEmailsInRequest_shouldReturnBadRequest() {
+        webTestClient.post()
+                .uri("/api/v1/team/create")
+                .bodyValue(new TeamRequest(
+                        "TEAM-DUP-MEM",
+                        "Duplicate Member Team",
+                        "Should fail for duplicate nested emails",
+                        List.of(
+                                new MemberRequest("Ava", "Miller", "ava.dup@example.com", "9091000012"),
+                                new MemberRequest("Noah", "Brown", "ava.dup@example.com", "9091000013")
+                        )
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Duplicate email in request: ava.dup@example.com");
+    }
+
+    @Test
+    void updateTeam_withDuplicateMemberEmailsInRequest_shouldReturnBadRequestAndKeepStateUnchanged() {
+        AtomicLong teamId = new AtomicLong();
+
+        webTestClient.post()
+                .uri("/api/v1/team/create")
+                .bodyValue(new TeamRequest(
+                        "TEAM-UPD-DUP",
+                        "Update Duplicate Team",
+                        "Original state",
+                        List.of(new MemberRequest("Mia", "Lee", "mia.unique@example.com", "9091000014"))
+                ))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> teamId.set(((Number) id).longValue()));
+
+        webTestClient.put()
+                .uri("/api/v1/team/update/{teamId}", teamId.get())
+                .bodyValue(new TeamRequest(
+                        "TEAM-UPD-DUP",
+                        "Update Duplicate Team",
+                        "Mutated state",
+                        List.of(
+                                new MemberRequest("Mia", "Lee", "mia.dup2@example.com", "9091000015"),
+                                new MemberRequest("Liam", "Ray", "mia.dup2@example.com", "9091000016")
+                        )
+                ))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Duplicate email in request: mia.dup2@example.com");
+
+        webTestClient.get()
+                .uri("/api/v1/team/get/{teamId}", teamId.get())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.description").isEqualTo("Original state")
+                .jsonPath("$.members.length()").isEqualTo(1)
+                .jsonPath("$.members[0].email").isEqualTo("mia.unique@example.com");
+    }
+
+    @Test
+    void getAllTeams_whenNoData_shouldReturnEmptyArray() {
+        webTestClient.get()
+                .uri("/api/v1/team/get/all")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(0);
+    }
 }
 
