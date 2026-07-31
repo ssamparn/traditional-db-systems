@@ -18,7 +18,7 @@ Typical reasons to split:
 - **Write-frequency separation**: volatile child data can change without bloating the parent table
 - **Storage and access patterns**: parent lookups are frequent; child fields are fetched only in specific use cases
 
-## Why unidirectional one-to-one is important
+## When to use unidirectional one-to-one?
 
 Unidirectional one-to-one is often the best default when only one side needs navigation in business logic.
 
@@ -53,6 +53,30 @@ Use **bidirectional** when:
 - both navigations are business-critical
 - reverse lookups are frequent in domain logic
 - you deliberately manage graph consistency on both sides
+
+## Setter design rationale (uni vs bi)
+
+### Why unidirectional entities can use plain Lombok setters
+
+In this module, mapping is intentionally one-way:
+
+- `Employee -> Workstation`
+- `Workstation` has no `Employee` reference
+
+Since there is no inverse field to synchronize, a plain Lombok setter is usually enough.
+
+### When to still add a custom setter in unidirectional models
+
+Even in unidirectional mappings, add a custom setter when you need domain invariants or side effects, such as:
+
+- rejecting invalid transitions (state-machine style rules)
+- triggering audit/event hooks
+- centralizing replacement semantics (e.g., protect from accidental null assignment)
+
+Rule of thumb:
+
+- bidirectional -> synchronization helpers strongly recommended
+- unidirectional -> simple setter is typically fine
 
 ## Mapping in this module
 
@@ -113,7 +137,7 @@ select id, employee_code, full_name, workstation_id_fk from employees;
 select id, desk_code, building, floor_number, zone from workstations;
 ```
 
-## Validation and API behavior
+## API behavior and Validation
 
 Service-level validation enforces:
 
@@ -166,7 +190,7 @@ cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-one-to-o
 DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_one_uni_directional_relations DB_USERNAME=postgres DB_PASSWORD=password ./mvnw spring-boot:run
 ```
 
-## Interview-ready quick answers
+## Interview-ready explanation (short version)
 
 - **Where is ownership in one-to-one?** The side with `@JoinColumn`.
 - **How is one-to-one enforced in DB?** FK + unique constraint.
@@ -180,3 +204,4 @@ DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_one_uni_directional_relations
 - Exposing entities directly from controllers
 - Replacing one-to-one child objects without orphan handling
 - Ignoring non-null owner constraints during update flows
+- These settings are appropriate for local learning and tests, but should be replaced with real authn/authz and migration-based schema management in production.

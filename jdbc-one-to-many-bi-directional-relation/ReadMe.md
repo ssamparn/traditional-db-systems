@@ -46,6 +46,22 @@ When creating a role and its users, always update both sides in memory:
 
 This module now does that through `Role.addUser(user)`.
 
+## Setter/helper rationale (bi vs uni)
+
+This is intentional and maps to modeling semantics:
+
+- In bidirectional relations, helper methods/custom setters are recommended to keep both sides consistent in memory.
+- In unidirectional relations, plain setters are often enough because there is no inverse side to synchronize.
+
+In this module, `Role.addUser(user)` exists for the same reason as custom setters in one-to-one bidirectional samples:
+
+- set `User.role` (owning side)
+- add `User` to `Role.users` (inverse side)
+
+Without this synchronization, you can observe half-linked objects in code and persist unexpected FK states.
+
+You may still add custom setters in unidirectional models when you must enforce domain invariants, auditing, or guarded replacement rules.
+
 ## DTOs in this module
 This module already returns DTOs instead of JPA entities directly:
 

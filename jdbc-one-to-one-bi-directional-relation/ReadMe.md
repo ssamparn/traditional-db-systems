@@ -18,7 +18,7 @@ Typical reasons to split into two tables:
 - **Evolution and ownership**: independent schema evolution without bloating a single table
 - **Performance tuning**: fetch only what is needed by use case (especially with larger dependent payloads)
 
-## When to use bidirectional one-to-one
+## When to use bidirectional one-to-one?
 
 Choose bidirectional only when both navigations are part of real business behavior:
 
@@ -34,6 +34,22 @@ If reverse navigation is never used, prefer unidirectional mapping for simpler c
 - `Organization <-> Address`
 - `Order <-> PaymentDetail`
 - `Device <-> DeviceConfiguration`
+
+## Setter design rationale (uni vs bi)
+
+### Why bidirectional entities use custom setters
+
+In bidirectional models (for example, `Organization <-> Address`), custom setters help keep both sides of the object graph consistent in memory:
+
+- `Organization.setAddress(...)` updates `Address.organization`
+- `Address.setOrganization(...)` updates `Organization.address`
+
+Without this synchronization, JPA can persist surprising states and business logic/tests may observe half-linked objects.
+
+Rule of thumb:
+
+- bidirectional -> synchronization helpers strongly recommended
+- unidirectional -> simple setter is typically fine
 
 ## Mapping in this module
 
@@ -110,7 +126,7 @@ select id, name, org_id, address_id_fk from organizations;
 select id, building, street, city, state, country, zipcode from addresses;
 ```
 
-## API behavior and validation
+## API behavior and Validation
 
 Input validation is enforced in the service layer before mapping/persistence:
 
@@ -175,4 +191,4 @@ DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_one_bi_directional_relations 
 - Using bidirectional mapping when only one direction is ever read
 - Forgetting sync helper methods, causing inconsistent object state
 - Replacing one-to-one children without orphan handling
-These settings are appropriate for local learning and tests, but should be replaced with real authn/authz and migration-based schema management in production.
+- These settings are appropriate for local learning and tests, but should be replaced with real authn/authz and migration-based schema management in production.
