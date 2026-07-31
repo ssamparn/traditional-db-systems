@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Persistence;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,20 +26,41 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "first_name")
+    @Column(name = "first_name", nullable = false, length = 80)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "last_name", nullable = false, length = 80)
     private String lastName;
 
-    @Column(name = "mobile")
+    @Column(name = "mobile", nullable = false, length = 20)
     private String mobile;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", nullable = false, unique = true, length = 128)
     private String email;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id_fk", nullable = false)
     private Role role;
+
+    public void setRole(Role role) {
+        if (this.role == role) {
+            return;
+        }
+
+        Role previousRole = this.role;
+        this.role = role;
+
+        if (previousRole != null && isUsersCollectionLoaded(previousRole)) {
+            previousRole.getUsers().remove(this);
+        }
+
+        if (role != null && isUsersCollectionLoaded(role) && !role.getUsers().contains(this)) {
+            role.getUsers().add(this);
+        }
+    }
+
+    private boolean isUsersCollectionLoaded(Role role) {
+        return Persistence.getPersistenceUtil().isLoaded(role, "users");
+    }
 }

@@ -15,8 +15,8 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="jdbc-one-to-one-bi-directional-relation" />
         <module name="jdbc-one-to-many-bi-directional-relation" />
+        <module name="jdbc-one-to-one-bi-directional-relation" />
         <module name="jdbc-many-to-many-bi-directional-relation" />
         <module name="jdbc-entity-relations" />
         <module name="jdbc-one-to-one-uni-directional-relation" />

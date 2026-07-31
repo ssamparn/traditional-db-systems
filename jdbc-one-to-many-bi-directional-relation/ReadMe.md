@@ -1,100 +1,171 @@
-# One-to-Many / Many-to-One Learning Guide
+# One-to-Many Bidirectional Relation
 
-This module demonstrates the canonical bidirectional relationship between:
+This module demonstrates a production-style **bidirectional one-to-many / many-to-one** model between:
 
-- `Role -> users` using `@OneToMany(mappedBy = "role")`
-- `User -> role` using `@ManyToOne` + `@JoinColumn(name = "role_id_fk")`
+- `Role` (inverse side) -> many `User`
+- `User` (owning side) -> one `Role`
 
-## What to learn here
+It is intentionally designed for learning JPA ownership/mapping semantics, graph synchronization, orphan lifecycle handling, and DTO-safe APIs.
 
-### Owning side
-`User` is the owning side because it stores the foreign key column:
+## Why this relation matters (architect point of view)
 
-- `role_id_fk`
+Use bidirectional one-to-many when:
 
-That means database updates to the relationship are driven by `User.role`.
+- parent-level aggregate operations and child-level navigation are both business-critical.
+- you need role-centric and user-centric use cases in the same bounded context.
+- you want explicit service-level control over lifecycle rules (replace, reassign, delete)
 
-### Inverse side
-`Role.users` is the inverse side because it uses:
+## When to use bidirectional one-to-many or many-to-one?
+Missing
 
-- `mappedBy = "role"`
+## Common business scenarios
 
-This side is useful for navigation in Java but does not own the foreign key.
+- `Department <-> Employee`
+- `Account <-> Transaction`
+- `Course <-> Enrollment`
+- `Project <-> Task`
 
-## Expected table shape
+## Mapping in this module
+
+### Owning side (`User`)
+
+```java
+@ManyToOne(fetch = FetchType.LAZY, optional = false)
+@JoinColumn(name = "role_id_fk", nullable = false)
+private Role role;
+```
+
+- FK lives in `users.role_id_fk`
+- owner side drives relationship updates at DB level
+
+### Inverse side (`Role`)
+
+```java
+@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<User> users;
+```
+
+- inverse side is for navigation and aggregate operations
+- `orphanRemoval = true` deletes users removed from the parent collection
+
+## Setter/helper design rationale (uni vs bi)
+
+This is intentional and has a technical reason.
+
+### Why bidirectional entities use custom setters/helpers
+
+Bidirectional models must keep both sides of the object graph consistent in memory:
+
+- `Role.addUser(user)` updates `User.role`
+- `User.setRole(role)` updates both old/new role collections
+
+Without this, persistence can produce surprising FK states and business logic/tests may observe half-linked objects.
+
+### Why unidirectional entities can use plain Lombok setters
+
+In unidirectional models there is only one navigable side. Since no inverse field exists, there is nothing to synchronize, and a plain setter is usually enough.
+
+### When to still add a custom setter in unidirectional models
+
+Add one when you need domain rules or controlled side effects:
+
+- state-transition guards
+- audit/event hooks
+- strict replacement semantics
+
+Rule of thumb:
+
+- bidirectional -> synchronization helpers recommended
+- unidirectional -> plain setter usually fine
+
+## API contract
+
+### Role APIs
+
+- `POST /api/v1/role/create`
+- `GET /api/v1/role/get/all`
+- `GET /api/v1/role/get/{roleId}`
+- `PUT /api/v1/role/update/{roleId}`
+- `DELETE /api/v1/role/delete/{roleId}`
+
+### User APIs
+
+- `POST /api/v1/user/create/role/{roleId}`
+- `GET /api/v1/user/get/all`
+- `GET /api/v1/user/get/{userId}`
+- `PUT /api/v1/user/update/{userId}`
+- `PUT /api/v1/user/reassign/{userId}/role/{roleId}`
+- `DELETE /api/v1/user/delete/{userId}`
+- `GET /api/v1/role/user/info`
+
+## Validation and error contract
+
+Service-layer validators enforce required fields, max lengths, and email shape.
+
+- `RoleRequestValidator`
+- `UserRequestValidator`
+
+Failures return structured errors from `GlobalExceptionHandler`:
+
+- `400` for validation/argument issues
+- `404` for missing role or user
+- `409` for DB constraint conflicts
+
+## Exact table behavior
+
+Expected schema shape:
 
 ```text
 roles
-  - id
-  - name
-  - description
+  - id (PK)
+  - name (UNIQUE, NOT NULL)
+  - description (NOT NULL)
 
 users
-  - id
-  - first_name
-  - last_name
-  - mobile
-  - email
-  - role_id_fk
+  - id (PK)
+  - first_name (NOT NULL)
+  - last_name (NOT NULL)
+  - mobile (NOT NULL)
+  - email (UNIQUE, NOT NULL)
+  - role_id_fk (FK -> roles.id, NOT NULL)
 ```
 
-## Object graph rule
-When creating a role and its users, always update both sides in memory:
+No join table is required for one-to-many.
 
-- add the `User` to `Role.users`
-- set `User.role`
+## Test taxonomy in this module
 
-This module now does that through `Role.addUser(user)`.
+- **Controller integration**: create/validation/reassign flow verification
+- **Relation integration**: owner/inverse synchronization before flush and after persist
+- **Orphan handling integration**: user orphan deletion and role cascade delete
+- **In-memory relation tests**: pure object graph guarantees without repository calls
 
-## Setter/helper rationale (bi vs uni)
+## Runtime profile strategy
 
-This is intentional and maps to modeling semantics:
+- `application.yml` sets default profile to `postgres`
+- `application-postgres.yml` is runtime configuration for PostgreSQL
+- `application-test.yml` is H2 integration-test configuration
+- Maven Surefire enforces `spring.profiles.active=test` during tests
 
-- In bidirectional relations, helper methods/custom setters are recommended to keep both sides consistent in memory.
-- In unidirectional relations, plain setters are often enough because there is no inverse side to synchronize.
+## Run app with Docker PostgreSQL
 
-In this module, `Role.addUser(user)` exists for the same reason as custom setters in one-to-one bidirectional samples:
-
-- set `User.role` (owning side)
-- add `User` to `Role.users` (inverse side)
-
-Without this synchronization, you can observe half-linked objects in code and persist unexpected FK states.
-
-You may still add custom setters in unidirectional models when you must enforce domain invariants, auditing, or guarded replacement rules.
-
-## DTOs in this module
-This module already returns DTOs instead of JPA entities directly:
-
-- `RoleResponse`
-- `UserResponse`
-- `RoleUserResponse`
-
-That keeps the API safe from recursion and makes the SQL join example easier to understand.
-
-## Quick SQL checks
-
-```sql
-select * from roles;
-select * from users;
-select id, first_name, last_name, role_id_fk from users;
+```bash
+cd /Users/sashank/Personal/projects/backend/traditional-db-systems
+POSTGRES_USER=postgres POSTGRES_PASSWORD=password docker compose up -d postgres
 ```
 
-## Observe this behavior
+```bash
+docker exec -it postgres psql -U postgres -c "CREATE DATABASE jdbc_one_to_many_bi_directional_relations;"
+```
 
-1. Create a role with nested users.
-2. Query `users` and inspect `role_id_fk`.
-3. Notice there is no separate join table.
-4. Compare this to the many-to-many module where a join table is required.
+```bash
+cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-one-to-many-bi-directional-relation
+DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_many_bi_directional_relations DB_USERNAME=postgres DB_PASSWORD=password ./mvnw spring-boot:run
+```
 
-## Architecture guardrails
+## Interview-ready quick answers
 
-- Keep owner-side updates (`User.role`) as the source of truth for FK changes.
-- Encapsulate graph synchronization in helper methods (`Role.addUser`).
-- Keep transaction boundaries in service layer (`@Transactional` on writes).
-- Return DTOs at API boundaries and avoid direct entity serialization.
-- Treat open security and `create-drop` schema settings as local-learning defaults only.
-
-## References
-- DZone: https://dzone.com/articles/introduction-to-spring-data-jpa-part-4-bidirection
-- Java Techie: https://www.youtube.com/watch?v=8qhaDBCJh6I&t=1256s
-- Techno Town Techie: https://www.youtube.com/watch?v=N7nLUQMmjxs
+- **Who owns one-to-many?** The `@ManyToOne` side (`User.role`) because it stores the FK.
+- **Why bidirectional here?** Both aggregate navigation (`Role.users`) and child navigation (`User.role`) are useful.
+- **Why helper methods?** To avoid half-linked in-memory graphs and FK anomalies.
+- **Why orphanRemoval?** To automatically clean removed children.
+- **Why DTOs?** To prevent entity leakage and recursion issues at API boundaries.

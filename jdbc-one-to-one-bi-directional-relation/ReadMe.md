@@ -1,6 +1,6 @@
 # One-to-One Bidirectional Relation
 
-This module demonstrates a production-style **bidirectional one-to-one** between:
+This module demonstrates a production-style **bidirectional one-to-one** model between:
 
 - `Organization` (owning side)
 - `Address` (inverse side)
@@ -20,7 +20,7 @@ Typical reasons to split into two tables:
 
 ## When to use bidirectional one-to-one?
 
-Choose bidirectional only when both navigations are part of real business behavior:
+Choose bidirectional one-to-one only when both navigations are part of real business behavior:
 
 - `Organization -> Address` for normal read/use cases
 - `Address -> Organization` for reverse lookups, reporting, or domain rules

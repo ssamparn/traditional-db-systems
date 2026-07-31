@@ -1,6 +1,7 @@
 package com.traditional.databases.jdbconetwomanybidirectionalrelation.db.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -26,26 +27,26 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 80)
     private String name;
 
+    @Column(nullable = false, length = 240)
     private String description;
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users = new ArrayList<>();
 
     public void addUser(User user) {
-        if (user == null || users.contains(user)) {
+        if (user == null) {
             return;
         }
-        users.add(user);
         user.setRole(this);
     }
 
     public void removeUser(User user) {
-        if (user == null || !users.contains(user)) {
+        if (user == null) {
             return;
         }
-        users.remove(user);
         user.setRole(null);
     }
 }

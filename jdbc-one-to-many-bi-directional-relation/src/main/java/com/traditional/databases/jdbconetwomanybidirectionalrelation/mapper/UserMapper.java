@@ -20,12 +20,22 @@ public class UserMapper {
 
     public UserResponse toUserResponse(User entity) {
         UserResponse response = new UserResponse();
+        response.setId(entity.getId());
         response.setFirstName(entity.getFirstName());
         response.setLastName(entity.getLastName());
         response.setMobile(entity.getMobile());
         response.setEmail(entity.getEmail());
+        response.setRoleId(entity.getRole() == null ? null : entity.getRole().getId());
 
         return response;
+    }
+
+    public User updateUserEntity(User entity, UserRequest request) {
+        entity.setFirstName(request.getFirstName());
+        entity.setLastName(request.getLastName());
+        entity.setMobile(request.getMobile());
+        entity.setEmail(request.getEmail());
+        return entity;
     }
 
 }
