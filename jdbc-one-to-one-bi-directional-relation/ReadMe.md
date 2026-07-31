@@ -1,36 +1,86 @@
-# One-to-One Learning Guide
+# One-to-One Bidirectional Relation (Learning + Interview Guide)
 
-This module demonstrates a bidirectional one-to-one relation between:
+This module demonstrates a production-style **bidirectional one-to-one** between:
 
-- `Organization`
-- `Address`
+- `Organization` (owning side)
+- `Address` (inverse side)
 
-## What to learn here
+It is intentionally designed for learning JPA mapping semantics, object-graph consistency, and API-safe modeling.
 
-### Owning side
-`Organization` is the owning side because it declares:
+## Why this relation matters (architect point of view)
 
-- `@OneToOne`
-- `@JoinColumn(name = "address_id_fk")`
+Use one-to-one when two aggregates have a strict **cardinality of exactly one related row** and you still want separate tables.
 
-That means the foreign key is stored in the `organizations` table.
+Typical reasons to split into two tables:
 
-### Inverse side
-`Address.organization` is the inverse side because it uses:
+- **Bounded context separation**: core entity (`Organization`) vs optional/volatile details (`Address`)
+- **Security/governance**: PII fields can be isolated in a separate table with tighter controls
+- **Evolution and ownership**: independent schema evolution without bloating a single table
+- **Performance tuning**: fetch only what is needed by use case (especially with larger dependent payloads)
 
-- `mappedBy = "address"`
+## When to use bidirectional one-to-one
 
-## Expected table shape
+Choose bidirectional only when both navigations are part of real business behavior:
+
+- `Organization -> Address` for normal read/use cases
+- `Address -> Organization` for reverse lookups, reporting, or domain rules
+
+If reverse navigation is never used, prefer unidirectional mapping for simpler code.
+
+## Common business scenarios
+
+- `User <-> UserProfile`
+- `Employee <-> EmployeeBadge`
+- `Organization <-> Address`
+- `Order <-> PaymentDetail`
+- `Device <-> DeviceConfiguration`
+
+## Mapping in this module
+
+### Owning side (`Organization`)
+
+```java
+@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+@JoinColumn(name = "address_id_fk", referencedColumnName = "id", nullable = false, unique = true)
+private Address address;
+```
+
+- Foreign key lives in `organizations.address_id_fk`
+- `unique = true` enforces one-to-one at DB level
+- `orphanRemoval = true` deletes replaced child rows (teaching orphan lifecycle)
+
+### Inverse side (`Address`)
+
+```java
+@OneToOne(mappedBy = "address")
+private Organization organization;
+```
+
+- No FK column here
+- `mappedBy` points to owner field name (`Organization.address`)
+
+### Object-graph synchronization
+
+Custom setters on both entities keep both sides aligned:
+
+- `Organization#setAddress(...)`
+- `Address#setOrganization(...)`
+
+This prevents half-linked objects and makes persistence behavior deterministic.
+
+## Exact table behavior
+
+Expected schema shape:
 
 ```text
 organizations
-  - id
+  - id (PK)
   - name
   - org_id
-  - address_id_fk
+  - address_id_fk (FK -> addresses.id, UNIQUE, NOT NULL)
 
 addresses
-  - id
+  - id (PK)
   - building
   - street
   - city
@@ -39,41 +89,67 @@ addresses
   - zipcode
 ```
 
-## Important observation
-There is **no join table** in the current design because this example uses `@JoinColumn`, not `@JoinTable`.
+No join table is created because one-to-one is modeled with `@JoinColumn`.
 
-So this query is **not expected** to return data in the current mapping:
-
-```sql
-select * from organization_address;
-```
-
-Instead, inspect the foreign key on `organizations.address_id_fk`.
-
-## Object graph rule
-This module now synchronizes both sides through entity setters:
-
-- `organization.setAddress(address)`
-- `address.setOrganization(organization)`
-
-That helps keep the in-memory object graph aligned with the database association.
-
-## DTO usage
-The web layer returns:
-
-- `OrganizationResponse`
-- `AddressResponse`
-
-So the API is cycle-safe and easier to reason about than returning entities directly.
-
-## Quick SQL checks
+## SQL checks to run
 
 ```sql
-select * from organizations;
-select * from addresses;
+-- 1) Verify schema columns
+select column_name, is_nullable
+from information_schema.columns
+where table_name in ('organizations', 'addresses')
+order by table_name, ordinal_position;
+
+-- 2) Verify one-to-one uniqueness constraint from owning side
+select conname, contype
+from pg_constraint
+where conrelid = 'organizations'::regclass;
+
+-- 3) Verify stored rows and foreign key values
 select id, name, org_id, address_id_fk from organizations;
+select id, building, street, city, state, country, zipcode from addresses;
 ```
 
-## References
-- DZone: https://dzone.com/articles/introduction-to-spring-data-jpa-part-6-bidirection
-- Techno Town Techie: https://www.youtube.com/watch?v=N7nLUQMmjxs
+## API behavior and validation
+
+Input validation is enforced in the service layer before mapping/persistence:
+
+- `organizationName`, `organizationId` required
+- nested `address` required
+- address fields required with size limits
+
+Invalid payload returns HTTP `400` with structured error details.
+
+## Orphan handling behavior
+
+Because owner uses `orphanRemoval = true`:
+
+- Updating an organization with a **new address object** removes the old address row
+- Deleting organization cascades delete to its address (through `CascadeType.ALL`)
+
+## Integration tests included
+
+- request validation test (`400` on invalid payload)
+- create/read response path test
+- orphan replacement test (old address row is deleted after update)
+
+Run module tests:
+
+```bash
+./mvnw -Dspring.profiles.active=test test
+```
+
+## Interview-ready explanation (short version)
+
+- **What is owner in 1-1?** The side with `@JoinColumn`; it controls FK updates.
+- **What does `mappedBy` do?** Marks the inverse side; no separate FK column created there.
+- **Why bidirectional?** Needed when both navigations are business-relevant.
+- **Why `orphanRemoval`?** Ensures replaced detached child records do not remain as stale rows.
+- **Why DTOs?** Avoid recursive serialization and keep API contracts stable.
+
+## Anti-patterns to avoid
+
+- Returning entities directly from controllers in bidirectional graphs
+- Using bidirectional mapping when only one direction is ever read
+- Forgetting sync helper methods, causing inconsistent object state
+- Replacing one-to-one children without orphan handling
