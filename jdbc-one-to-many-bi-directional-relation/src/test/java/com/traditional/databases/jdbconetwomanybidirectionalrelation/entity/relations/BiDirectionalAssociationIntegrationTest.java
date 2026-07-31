@@ -4,6 +4,7 @@ import com.traditional.databases.jdbconetwomanybidirectionalrelation.db.entity.R
 import com.traditional.databases.jdbconetwomanybidirectionalrelation.db.entity.User;
 import com.traditional.databases.jdbconetwomanybidirectionalrelation.db.repository.RoleRepository;
 import com.traditional.databases.jdbconetwomanybidirectionalrelation.db.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ class BiDirectionalAssociationIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @AfterEach
     void cleanup() {
@@ -55,9 +59,10 @@ class BiDirectionalAssociationIntegrationTest {
         userRepository.saveAndFlush(savedUser);
 
         User reloaded = userRepository.findById(savedUser.getId()).orElseThrow();
+        Role reloadedOldRole = roleRepository.findByIdWithUsers(oldRole.getId()).orElseThrow();
 
         assertThat(reloaded.getRole().getId()).isEqualTo(newRole.getId());
-        assertThat(oldRole.getUsers()).doesNotContain(savedUser);
+        assertThat(reloadedOldRole.getUsers()).extracting(User::getId).doesNotContain(savedUser.getId());
     }
 
     @Test
@@ -73,6 +78,26 @@ class BiDirectionalAssociationIntegrationTest {
         roleRepository.saveAndFlush(savedRole);
 
         assertThat(userRepository.existsById(userId)).isFalse();
+    }
+
+    @Test
+    void reassigningOwningSide_withDetachedPreviousRoleProxy_shouldPersistNewOwnerAfterPersist() {
+        Role oldRole = roleRepository.saveAndFlush(createRole("Core", "Core owners"));
+        Role newRole = roleRepository.saveAndFlush(createRole("Platform", "Platform owners"));
+
+        User user = createUser("Drew", "Hill", "7000000004", "drew@example.com");
+        user.setRole(oldRole);
+        User savedUser = userRepository.saveAndFlush(user);
+
+        entityManager.clear();
+
+        User detachedGraphUser = userRepository.findById(savedUser.getId()).orElseThrow();
+        detachedGraphUser.setRole(newRole);
+        userRepository.saveAndFlush(detachedGraphUser);
+
+        User reloaded = userRepository.findById(savedUser.getId()).orElseThrow();
+
+        assertThat(reloaded.getRole().getId()).isEqualTo(newRole.getId());
     }
 
     private Role createRole(String name, String description) {
