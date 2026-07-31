@@ -66,6 +66,7 @@
 
     <modules>
         <module>jdbc-entity-relations</module>
+        <module>jdbc-one-to-one-uni-directional-relation</module>
         <module>jdbc-one-to-one-bi-directional-relation</module>
         <module>jdbc-one-to-many-bi-directional-relation</module>
         <module>jdbc-many-to-many-bi-directional-relation</module>

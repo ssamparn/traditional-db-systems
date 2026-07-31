@@ -9,9 +9,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jdbc-one-to-one-bi-directional-relation</artifactId>
-    <name>Jdbc One To One BiDirectional Relation</name>
-    <description>Learning module: bidirectional one-to-one relation mapping with PostgreSQL.</description>
+    <artifactId>jdbc-one-to-one-uni-directional-relation</artifactId>
+    <name>Jdbc One To One UniDirectional Relation</name>
+    <description>jdbc-one-to-one-uni-directional-relation</description>
 
     <dependencies>
         <dependency>

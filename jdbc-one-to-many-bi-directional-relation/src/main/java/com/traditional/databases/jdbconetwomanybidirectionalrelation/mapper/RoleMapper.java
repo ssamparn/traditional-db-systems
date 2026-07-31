@@ -1,0 +1,57 @@
+package com.traditional.databases.jdbconetwomanybidirectionalrelation.mapper;
+
+import com.traditional.databases.jdbconetwomanybidirectionalrelation.db.entity.Role;
+import com.traditional.databases.jdbconetwomanybidirectionalrelation.db.entity.User;
+import com.traditional.databases.jdbconetwomanybidirectionalrelation.web.model.request.RoleRequest;
+import com.traditional.databases.jdbconetwomanybidirectionalrelation.web.model.request.UserRequest;
+import com.traditional.databases.jdbconetwomanybidirectionalrelation.web.model.response.RoleResponse;
+import com.traditional.databases.jdbconetwomanybidirectionalrelation.web.model.response.UserResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class RoleMapper {
+
+    private final UserMapper userMapper;
+
+    public Role toRoleEntity(RoleRequest request) {
+        Role role = new Role();
+        role.setName(request.getName());
+        role.setDescription(request.getDescription());
+        List<User> users = createUsers(request.getUsers());
+        users.forEach(role::addUser);
+        return role;
+    }
+
+    private List<User> createUsers(List<UserRequest> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return users.stream()
+                .map(userMapper::toUserEntity)
+                .collect(Collectors.toList());
+    }
+
+    public RoleResponse toRoleResponse(Role entity) {
+        RoleResponse response = new RoleResponse();
+        response.setName(entity.getName());
+        response.setDescription(entity.getDescription());
+        List<UserResponse> users = createUserResponse(entity.getUsers());
+        response.setUsers(users);
+        return response;
+    }
+
+    private List<UserResponse> createUserResponse(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+    }
+}
