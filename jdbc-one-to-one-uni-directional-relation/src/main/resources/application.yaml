@@ -1,3 +1,8 @@
+server:
+  port: 8082
+
 spring:
   application:
-    name: jdbc-one-to-one-uni-directional-relation
+    name: one-to-one-uni-directional-relations
+  profiles:
+    default: postgres
