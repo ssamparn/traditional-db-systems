@@ -180,4 +180,3 @@ DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_one_uni_directional_relations
 - Exposing entities directly from controllers
 - Replacing one-to-one child objects without orphan handling
 - Ignoring non-null owner constraints during update flows
-

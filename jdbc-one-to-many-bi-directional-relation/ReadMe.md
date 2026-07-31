@@ -70,6 +70,14 @@ select id, first_name, last_name, role_id_fk from users;
 3. Notice there is no separate join table.
 4. Compare this to the many-to-many module where a join table is required.
 
+## Architecture guardrails
+
+- Keep owner-side updates (`User.role`) as the source of truth for FK changes.
+- Encapsulate graph synchronization in helper methods (`Role.addUser`).
+- Keep transaction boundaries in service layer (`@Transactional` on writes).
+- Return DTOs at API boundaries and avoid direct entity serialization.
+- Treat open security and `create-drop` schema settings as local-learning defaults only.
+
 ## References
 - DZone: https://dzone.com/articles/introduction-to-spring-data-jpa-part-4-bidirection
 - Java Techie: https://www.youtube.com/watch?v=8qhaDBCJh6I&t=1256s

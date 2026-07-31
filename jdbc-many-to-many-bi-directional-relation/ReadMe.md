@@ -82,3 +82,10 @@ select * from users_roles;
 4. Update the user with a different set of `roleIds`.
 5. Observe how the join table changes.
 
+## Architecture guardrails
+
+- Keep relation mutation logic in service methods, not controllers.
+- Keep both sides synchronized in entity helper methods before persistence.
+- Return DTOs from API boundaries to avoid recursive graph exposure.
+- If using Reactor types with JPA, execute blocking repository calls on `boundedElastic`.
+- Keep security and schema auto-create settings as learning defaults only.

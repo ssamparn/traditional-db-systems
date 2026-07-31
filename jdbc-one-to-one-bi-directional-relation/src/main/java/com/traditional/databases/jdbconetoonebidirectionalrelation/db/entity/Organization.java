@@ -1,6 +1,7 @@
 package com.traditional.databases.jdbconetoonebidirectionalrelation.db.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,7 +23,11 @@ public class Organization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 120)
     private String name;
+
+    @Column(nullable = false, unique = true, length = 64)
     private String orgId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)

@@ -26,6 +26,13 @@ Focus: a mixed model with `@OneToOne`, `@ManyToMany`, and a self-referencing cat
 - `Book <-> Category`: many-to-many
 - `Category -> Category`: parent/child hierarchy
 
+### `jdbc-one-to-one-uni-directional-relation`
+Focus: unidirectional one-to-one with strict owner-side control.
+
+- `Employee -> Workstation`
+- No reverse field from `Workstation` to `Employee`
+- Useful when reverse navigation has no business value
+
 ### `jdbc-one-to-one-bi-directional-relation`
 Focus: classic bidirectional one-to-one.
 
@@ -67,6 +74,17 @@ Examples from this workspace:
 - `User.addRole(role)` also adds the user to `role.getUsers()`
 - `Organization.setAddress(address)` also sets `address.setOrganization(organization)`
 
+## Architecture guardrails (important)
+
+These modules intentionally use a teaching-oriented architecture:
+
+- Controllers and services expose `Mono`/`Flux` for API consistency across modules.
+- Persistence uses blocking `JpaRepository` calls, executed on `Schedulers.boundedElastic()`.
+- `@Transactional` boundaries are still applied in service methods; this is a learning simplification, not a production reactive persistence model.
+- Request validation is handled in explicit service-layer validators to make invariants visible in code.
+- Security config currently permits all requests and disables CSRF to reduce friction in learning flows.
+- `ddl-auto: create-drop` is used for demo speed and should not be used in production.
+
 ## Build and test
 Run from repository root:
 
@@ -77,7 +95,7 @@ mvn clean test
 Run a single module:
 
 ```bash
-cd jdbc-postgresql-one-two-many-bi-directional-relation
+cd jdbc-one-to-one-uni-directional-relation
 ./mvnw spring-boot:run
 ```
 
@@ -85,4 +103,3 @@ cd jdbc-postgresql-one-two-many-bi-directional-relation
 - Shared dependency and plugin management is centralized in the root parent POM.
 - The modules now prefer DTOs for HTTP responses where returning entities directly would create recursion or overexpose graph structure.
 - If Maven dependency resolution fails in your environment, check your JDK truststore, proxy, and Maven certificate settings first.
-

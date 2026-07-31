@@ -175,3 +175,4 @@ DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_one_bi_directional_relations 
 - Using bidirectional mapping when only one direction is ever read
 - Forgetting sync helper methods, causing inconsistent object state
 - Replacing one-to-one children without orphan handling
+These settings are appropriate for local learning and tests, but should be replaced with real authn/authz and migration-based schema management in production.

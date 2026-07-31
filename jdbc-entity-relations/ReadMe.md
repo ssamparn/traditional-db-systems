@@ -83,5 +83,13 @@ select * from books_authors;
 select * from books_categories;
 ```
 
+## Architecture guardrails
+
+- Controllers should return DTOs instead of exposing entities directly.
+- If Reactor types are used with JPA, route blocking calls to `boundedElastic`.
+- Keep transaction boundaries in service layer (`@Transactional` for writes).
+- Keep validation explicit and close to write flows.
+- Use learning-only defaults (`permitAll`, `create-drop`) only in local/demo environments.
+
 ## Reference
 https://medium.com/huawei-developers/database-relationships-in-spring-data-jpa-8d7181f50f60

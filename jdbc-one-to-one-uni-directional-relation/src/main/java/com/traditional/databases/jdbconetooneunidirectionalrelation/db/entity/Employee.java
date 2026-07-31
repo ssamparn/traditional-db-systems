@@ -1,6 +1,7 @@
 package com.traditional.databases.jdbconetooneunidirectionalrelation.db.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,11 +24,13 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 64)
     private String employeeCode;
+
+    @Column(nullable = false, length = 120)
     private String fullName;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     @JoinColumn(name = "workstation_id_fk", referencedColumnName = "id", nullable = false, unique = true)
     private Workstation workstation;
 }
-
