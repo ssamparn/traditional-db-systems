@@ -18,7 +18,7 @@ This repository is organized so you can study each association type in isolation
 
 ## Modules
 
-### `jdbc-postgresql-entity-relations`
+### `jdbc-entity-relations`
 Focus: a mixed model with `@OneToOne`, `@ManyToMany`, and a self-referencing category tree.
 
 - `Book -> Photo`: one-to-one
@@ -26,20 +26,20 @@ Focus: a mixed model with `@OneToOne`, `@ManyToMany`, and a self-referencing cat
 - `Book <-> Category`: many-to-many
 - `Category -> Category`: parent/child hierarchy
 
-### `jdbc-postgresql-one-two-one-bi-directional-relation`
+### `jdbc-one-to-one-bi-directional-relation`
 Focus: classic bidirectional one-to-one.
 
 - `Organization -> Address`
 - Owning side stores the foreign key
 
-### `jdbc-postgresql-one-two-many-bi-directional-relation`
+### `jdbc-one-to-many-bi-directional-relation`
 Focus: canonical bidirectional one-to-many / many-to-one.
 
 - `Role -> users`
 - `User -> role`
 - `User` is the owning side because it contains the foreign key column
 
-### `jdbc-postgresql-many-two-many-bi-directional-relation`
+### `jdbc-many-to-many-bi-directional-relation`
 Focus: bidirectional many-to-many with an explicit join table.
 
 - `User <-> Role`

@@ -65,10 +65,10 @@
     </build>
 
     <modules>
-        <module>jdbc-postgresql-entity-relations</module>
-        <module>jdbc-postgresql-one-two-one-bi-directional-relation</module>
-        <module>jdbc-postgresql-one-two-many-bi-directional-relation</module>
-        <module>jdbc-postgresql-many-two-many-bi-directional-relation</module>
+        <module>jdbc-entity-relations</module>
+        <module>jdbc-one-to-one-bi-directional-relation</module>
+        <module>jdbc-one-to-many-bi-directional-relation</module>
+        <module>jdbc-many-to-many-bi-directional-relation</module>
     </modules>
 
 </project>

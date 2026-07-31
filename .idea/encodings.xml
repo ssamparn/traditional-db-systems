@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/jdbc-postgresql-entity-relations/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/jdbc-postgresql-many-two-many-bi-directional-relation/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/jdbc-postgresql-one-two-many-bi-directional-relation/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/jdbc-postgresql-one-two-one-bi-directional-relation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jdbc-entity-relations/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jdbc-many-to-many-bi-directional-relation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jdbc-one-to-many-bi-directional-relation/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/jdbc-one-to-one-bi-directional-relation/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
