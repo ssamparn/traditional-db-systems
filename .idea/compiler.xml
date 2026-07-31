@@ -8,17 +8,28 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
       </profile>
+      <profile name="Annotation profile for jdbc-one-to-many-bi-directional-relation" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="jdbc-one-to-many-bi-directional-relation" />
+      </profile>
       <profile name="Annotation profile for Traditional Database System" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="jdbc-one-to-many-bi-directional-relation" />
         <module name="jdbc-one-to-one-bi-directional-relation" />
         <module name="jdbc-many-to-many-bi-directional-relation" />
         <module name="jdbc-entity-relations" />
+        <module name="jdbc-one-to-many-uni-directional-relation" />
         <module name="jdbc-one-to-one-uni-directional-relation" />
       </profile>
     </annotationProcessing>
@@ -29,6 +40,7 @@
       <module name="jdbc-entity-relations" options="-parameters" />
       <module name="jdbc-many-to-many-bi-directional-relation" options="-parameters" />
       <module name="jdbc-one-to-many-bi-directional-relation" options="-parameters" />
+      <module name="jdbc-one-to-many-uni-directional-relation" options="-parameters" />
       <module name="jdbc-one-to-one-bi-directional-relation" options="-parameters" />
       <module name="jdbc-one-to-one-uni-directional-relation" options="-parameters" />
       <module name="traditional-db-systems" options="-parameters" />

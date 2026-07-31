@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/jdbc-one-to-one-uni-directional-relation/pom.xml" />
+        <option value="$PROJECT_DIR$/jdbc-one-to-many-uni-directional-relation/pom.xml" />
       </list>
     </option>
   </component>

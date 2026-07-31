@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: jdbc-one-to-many-uni-directional-relation

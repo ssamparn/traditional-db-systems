@@ -9,9 +9,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jdbc-one-to-many-bi-directional-relation</artifactId>
-    <name>Jdbc One To Many BiDirectional Relation</name>
-    <description>Learning module: bidirectional one-to-many and many-to-one relation mapping.</description>
+    <artifactId>jdbc-one-to-many-uni-directional-relation</artifactId>
+
+    <name>Jdbc One To Many UniDirectional Relation</name>
+    <description>Learning module: unidirectional one-to-many and many-to-one relation mapping.</description>
 
     <dependencies>
         <dependency>
@@ -120,5 +121,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
