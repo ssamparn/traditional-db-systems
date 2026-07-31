@@ -14,7 +14,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -118,6 +117,223 @@ class MemberControllerIntegrationTest {
         Member unchanged = memberRepository.findById(memberId).orElseThrow();
         assertThat(unchanged.getEmail()).isEqualTo("luca.app@example.com");
         assertThat(unchanged.getMobile()).isEqualTo("9090000103");
+    }
+
+    @Test
+    void getMemberById_shouldReturnPersistedMember() {
+        Team team = createTeam("TEAM-GET-MEMBER", "Getter Team");
+
+        Long[] memberIdHolder = new Long[1];
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Nora", "Hill", "nora.get@example.com", "9092000001"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> memberIdHolder[0] = ((Number) id).longValue());
+
+        webTestClient.get()
+                .uri("/api/v1/member/get/{memberId}", memberIdHolder[0])
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(memberIdHolder[0])
+                .jsonPath("$.email").isEqualTo("nora.get@example.com")
+                .jsonPath("$.teamId").isEqualTo(team.getId());
+    }
+
+    @Test
+    void getAllMembers_shouldReturnAllPersistedMembers() {
+        Team firstTeam = createTeam("TEAM-LIST-1", "First List Team");
+        Team secondTeam = createTeam("TEAM-LIST-2", "Second List Team");
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", firstTeam.getId())
+                .bodyValue(new MemberRequest("Ava", "Mills", "ava.list@example.com", "9092000002"))
+                .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", secondTeam.getId())
+                .bodyValue(new MemberRequest("Eli", "Shaw", "eli.list@example.com", "9092000003"))
+                .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient.get()
+                .uri("/api/v1/member/get/all")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isNumber()
+                .jsonPath("$[1].id").isNumber();
+
+        assertThat(memberRepository.count()).isEqualTo(2L);
+    }
+
+    @Test
+    void updateMember_shouldPersistProfileChangesAndKeepOwnership() {
+        Team team = createTeam("TEAM-UPD-MBR", "Update Member Team");
+
+        Long[] memberIdHolder = new Long[1];
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Mia", "Stone", "mia.before@example.com", "9092000004"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> memberIdHolder[0] = ((Number) id).longValue());
+
+        webTestClient.put()
+                .uri("/api/v1/member/update/{memberId}", memberIdHolder[0])
+                .bodyValue(new MemberRequest("Mia", "Stone", "mia.after@example.com", "9092009999"))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(memberIdHolder[0])
+                .jsonPath("$.email").isEqualTo("mia.after@example.com")
+                .jsonPath("$.mobile").isEqualTo("9092009999")
+                .jsonPath("$.teamId").isEqualTo(team.getId());
+
+        Member updated = memberRepository.findById(memberIdHolder[0]).orElseThrow();
+        assertThat(updated.getEmail()).isEqualTo("mia.after@example.com");
+    }
+
+    @Test
+    void deleteMember_shouldRemoveMemberAndKeepTeam() {
+        Team team = createTeam("TEAM-DEL-MBR", "Delete Member Team");
+
+        Long[] memberIdHolder = new Long[1];
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Luca", "Dane", "luca.delete@example.com", "9092000005"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> memberIdHolder[0] = ((Number) id).longValue());
+
+        webTestClient.delete()
+                .uri("/api/v1/member/delete/{memberId}", memberIdHolder[0])
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(memberIdHolder[0]);
+
+        assertThat(memberRepository.existsById(memberIdHolder[0])).isFalse();
+        assertThat(teamRepository.existsById(team.getId())).isTrue();
+    }
+
+    @Test
+    void createMember_withUnknownTeam_shouldReturnNotFound() {
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", 999994L)
+                .bodyValue(new MemberRequest("Ghost", "User", "ghost@example.com", "9092000006"))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Team not found with Id: 999994");
+    }
+
+    @Test
+    void createMember_withDuplicateEmail_shouldReturnConflict() {
+        Team firstTeam = createTeam("TEAM-CONF-1", "Conflict Team One");
+        Team secondTeam = createTeam("TEAM-CONF-2", "Conflict Team Two");
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", firstTeam.getId())
+                .bodyValue(new MemberRequest("Ari", "Lane", "ari.conflict@example.com", "9092000007"))
+                .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", secondTeam.getId())
+                .bodyValue(new MemberRequest("Ari", "Lane", "ari.conflict@example.com", "9092000008"))
+                .exchange()
+                .expectStatus().isEqualTo(409)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Database constraint violation");
+    }
+
+    @Test
+    void getMember_withUnknownId_shouldReturnNotFound() {
+        webTestClient.get()
+                .uri("/api/v1/member/get/{memberId}", 999995L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Member not found with Id: 999995");
+    }
+
+    @Test
+    void updateMember_withUnknownId_shouldReturnNotFound() {
+        webTestClient.put()
+                .uri("/api/v1/member/update/{memberId}", 999996L)
+                .bodyValue(new MemberRequest("X", "Y", "xy@example.com", "9092000009"))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Member not found with Id: 999996");
+    }
+
+    @Test
+    void deleteMember_withUnknownId_shouldReturnNotFound() {
+        webTestClient.delete()
+                .uri("/api/v1/member/delete/{memberId}", 999997L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Member not found with Id: 999997");
+    }
+
+    @Test
+    void reassignMember_withUnknownTeam_shouldReturnNotFound() {
+        Team sourceTeam = createTeam("TEAM-RS-UNK", "Reassign Source");
+        Long[] memberIdHolder = new Long[1];
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", sourceTeam.getId())
+                .bodyValue(new MemberRequest("Rin", "Vale", "rin.reassign@example.com", "9092000010"))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.id").value(id -> memberIdHolder[0] = ((Number) id).longValue());
+
+        webTestClient.put()
+                .uri("/api/v1/member/reassign/{memberId}/team/{teamId}", memberIdHolder[0], 999998L)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Team not found with Id: 999998");
+    }
+
+    @Test
+    void reassignMember_withUnknownMember_shouldReturnNotFound() {
+        Team targetTeam = createTeam("TEAM-RM-UNK", "Reassign Target");
+
+        webTestClient.put()
+                .uri("/api/v1/member/reassign/{memberId}/team/{teamId}", 999999L, targetTeam.getId())
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Member not found with Id: 999999");
+    }
+
+    @Test
+    void getTeamMemberInfo_shouldReturnJoinedProjection() {
+        Team team = createTeam("TEAM-JOIN", "Join Projection Team");
+
+        webTestClient.post()
+                .uri("/api/v1/member/create/team/{teamId}", team.getId())
+                .bodyValue(new MemberRequest("Ari", "North", "ari.join@example.com", "9092000011"))
+                .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient.get()
+                .uri("/api/v1/team/member/info")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].teamId").isNumber()
+                .jsonPath("$[0].memberId").isNumber();
     }
 
     private Team createTeam(String code, String name) {
