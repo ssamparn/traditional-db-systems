@@ -14,71 +14,14 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="jdbc-many-to-many-with-join-entity" />
-      </profile>
-      <profile name="Annotation profile for jdbc-entity-relations" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
         <module name="jdbc-entity-relations" />
-      </profile>
-      <profile name="Annotation profile for jdbc-fetch-strategies-n-plus-1-query-problem" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="jdbc-fetch-strategies-n-plus-1-query-problem" />
-      </profile>
-      <profile name="Annotation profile for jdbc-many-to-many-bi-directional-relation" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="jdbc-many-to-many-bi-directional-relation" />
-      </profile>
-      <profile name="Annotation profile for jdbc-one-to-many-bi-directional-relation" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="jdbc-one-to-many-bi-directional-relation" />
-      </profile>
-      <profile name="Annotation profile for jdbc-one-to-many-uni-directional-relation" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
         <module name="jdbc-one-to-many-uni-directional-relation" />
-      </profile>
-      <profile name="Annotation profile for jdbc-one-to-one-bi-directional-relation" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
+        <module name="jdbc-fetch-strategies-n-plus-1-query-problem" />
+        <module name="jdbc-one-to-many-bi-directional-relation" />
         <module name="jdbc-one-to-one-bi-directional-relation" />
-      </profile>
-      <profile name="Annotation profile for jdbc-one-to-one-uni-directional-relation" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/Rabobank/maven-local-repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
+        <module name="jdbc-many-to-many-with-join-entity" />
+        <module name="jdbc-many-to-many-bi-directional-relation" />
         <module name="jdbc-one-to-one-uni-directional-relation" />
       </profile>
     </annotationProcessing>

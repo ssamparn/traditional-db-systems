@@ -154,7 +154,7 @@ where conrelid in ('students'::regclass, 'courses'::regclass, 'students_courses'
 
 ## Runtime profile strategy
 
-- `application.yml` sets default profile to `postgres`
+- `application-postgres.yml` sets default profile to `postgres`
 - `application-postgres.yml` is runtime PostgreSQL config
 - `application-test.yml` is H2 integration-test config
 - Maven Surefire sets `spring.profiles.active=test` during tests

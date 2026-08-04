@@ -181,7 +181,7 @@ select id, first_name, last_name, email, role_id_fk from users;
 
 ## Runtime profile strategy
 
-- `application.yml` sets default profile to `postgres`
+- `application-postgres.yml` sets default profile to `postgres`
 - `application-postgres.yml` is runtime configuration for PostgreSQL
 - `application-test.yml` is H2 integration-test configuration
 - Maven Surefire enforces `spring.profiles.active=test` during tests
