@@ -68,6 +68,14 @@ Focus: many-to-many with **business meaning** represented as a first-class assoc
 - Unique association guard for `(student, course)`
 - Demonstrates why real systems often promote pure join tables into explicit entities
 
+### `jdbc-fetch-strategies-n-plus-1-query-problem`
+Focus: fetch-planning and query explosion analysis on nested graphs.
+
+- `Author -> books -> reviews`
+- Demonstrates `LAZY` vs `EAGER` impact on SQL count
+- Covers `N+1` and `N+1+N` patterns on one-parent and many-parent retrieval
+- Shows mitigation with `JOIN FETCH` and `@EntityGraph`
+
 ## Quick mental model
 
 ### Owning side

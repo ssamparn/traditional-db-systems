@@ -72,6 +72,7 @@
         <module>jdbc-one-to-many-bi-directional-relation</module>
         <module>jdbc-many-to-many-bi-directional-relation</module>
         <module>jdbc-many-to-many-with-join-entity</module>
+        <module>jdbc-fetch-strategies-n-plus-1-query-problem</module>
     </modules>
 
 </project>

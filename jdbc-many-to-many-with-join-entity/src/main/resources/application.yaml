@@ -5,4 +5,4 @@ spring:
     default: postgres
 
 server:
-  port: 8084
+  port: 8086

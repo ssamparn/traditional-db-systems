@@ -1,0 +1,8 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: jdbc-fetch-strategies-n-plus-1-query-problem
+  profiles:
+    default: postgres

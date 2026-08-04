@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/jdbc-one-to-one-uni-directional-relation/pom.xml" />
         <option value="$PROJECT_DIR$/jdbc-one-to-many-uni-directional-relation/pom.xml" />
         <option value="$PROJECT_DIR$/jdbc-many-to-many-with-join-entity/pom.xml" />
+        <option value="$PROJECT_DIR$/jdbc-fetch-strategies-n-plus-1-query-problem/pom.xml" />
       </list>
     </option>
   </component>

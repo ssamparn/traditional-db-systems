@@ -8,9 +8,14 @@
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>jdbc-many-to-many-with-join-entity</artifactId>
-    <name>Jdbc Many To Many With Join Entity</name>
-    <description>jdbc-many-to-many-with-join-entity</description>
+
+    <artifactId>jdbc-fetch-strategies-n-plus-1-query-problem</artifactId>
+    <name>Jdbc Fetch Strategies N+1 Query Problem</name>
+    <description>jdbc-fetch-strategies-n-plus-1-query-problem</description>
+
+    <properties>
+        <java.version>25</java.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -37,27 +42,20 @@
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
