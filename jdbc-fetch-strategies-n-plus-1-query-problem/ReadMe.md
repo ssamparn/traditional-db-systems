@@ -37,21 +37,21 @@ You should treat fetch strategy as a design concern when:
 
 ## Common business scenarios
 
-- Catalog service: `Category -> products -> prices`
-- Education platform: `Course -> modules -> lessons`
-- Marketplace: `Seller -> listings -> offers`
-- Publishing: `Author -> books -> reviews`
+- Catalog service: `Category -> Products -> Prices`
+- Education platform: `Course -> Modules -> Lessons`
+- Marketplace: `Seller -> Listings -> Offers`
+- Publishing: `Author -> Books -> Reviews`
 
 All can look correct in code but fail under load if fetch plans are not explicit.
 
 ## Interview perspective: LAZY vs EAGER vs fetch plans
 
-Use **LAZY by default** when:
+Use **`LAZY (By default)`** when:
 
 - large child collections are not needed in every use case
 - you can control loading at query/use-case boundaries
 
-Use **EAGER selectively** when:
+Use **`EAGER selectively`** when:
 
 - association is tiny and always needed
 - you can prove no list-path over-fetching impact
@@ -276,32 +276,7 @@ This is intentionally exercised in integration tests.
 
 ## Run app with Docker PostgreSQL
 
-Start PostgreSQL from repository root:
 
-```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems
-POSTGRES_USER=postgres POSTGRES_PASSWORD=password docker compose up -d postgres
-```
-
-Create DB for this module:
-
-```bash
-docker exec -it postgres psql -U postgres -c "CREATE DATABASE jdbc_fetch_strategies_n_plus_1_query_problem;"
-```
-
-Run the module:
-
-```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-fetch-strategies-n-plus-1-query-problem
-DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_fetch_strategies_n_plus_1_query_problem DB_USERNAME=postgres DB_PASSWORD=password ./mvnw spring-boot:run
-```
-
-Run tests for this module:
-
-```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-fetch-strategies-n-plus-1-query-problem
-./mvnw test
-```
 
 ## Interview-ready explanation (short version)
 
