@@ -9,12 +9,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 #      POSTGRES_DB: jdbc_postgresql_book_relations
-      POSTGRES_DB: jdbc_fetch_strategies_n_plus_1_query_problem
 #      POSTGRES_DB: jdbc_one_to_one_bi_directional_relations
 #      POSTGRES_DB: jdbc_one_to_one_uni_directional_relations
 #      POSTGRES_DB: jdbc_one_to_many_uni_directional_relations
 #      POSTGRES_DB: jdbc_one_to_many_bi_directional_relations
 #      POSTGRES_DB: jdbc_many_to_many_bi_directional_relations
+#      POSTGRES_DB: jdbc_many_to_many_with_join_entity
+      POSTGRES_DB: jdbc_fetch_strategies_n_plus_1_query_problem
       TZ: UTC
     volumes:
       - postgres-data:/var/lib/postgresql/data

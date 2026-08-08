@@ -30,9 +30,9 @@ This module makes that failure mode visible through explicit APIs, query counts,
 
 You should treat fetch strategy as a design concern when:
 
-- list endpoints return aggregate graphs (`authors -> books -> reviews`)
+- List endpoints return aggregate graphs (`authors -> books -> reviews`)
 - APIs are latency-sensitive (customer search, dashboards, feeds)
-- data cardinality is expected to grow unpredictably
+- Data cardinality is expected to grow unpredictably
 - DB is a shared dependency for multiple services
 
 ## Common business scenarios
@@ -276,7 +276,39 @@ This is intentionally exercised in integration tests.
 
 ## Run app with Docker PostgreSQL
 
+Start PostgreSQL container from repository:
 
+```bash
+$ docker compose -f docker-compose.yml up
+```
+
+## Startup seed data for manual testing
+
+When the app starts with profile `postgres`, a bootstrap runner inserts a small deterministic dataset if tables are empty:
+
+- `3` rows in `authors`
+- `9` rows in `books` (`3` books per author)
+- `45` rows in `reviews` (`5` reviews per book)
+
+Seed behavior:
+
+- runs only in `postgres` profile
+- skips insertion if any of the three tables already has data
+- keeps startup idempotent for local manual testing
+
+Typical seeded graph:
+
+- author 1 -> 3 books -> 15 reviews
+- author 2 -> 3 books -> 15 reviews
+- author 3 -> 3 books -> 15 reviews
+
+- Verify seeded rows:
+
+```sql
+select count(*) as authors from authors;
+select count(*) as books from books;
+select count(*) as reviews from reviews;
+```
 
 ## Interview-ready explanation (short version)
 

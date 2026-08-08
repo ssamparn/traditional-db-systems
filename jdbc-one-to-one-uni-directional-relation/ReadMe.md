@@ -170,24 +170,10 @@ Because owner side uses `orphanRemoval = true`:
 
 ## Run app with Docker PostgreSQL
 
-Start PostgreSQL container from repository root:
+Start PostgreSQL container from repository:
 
 ```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems
-POSTGRES_USER=postgres POSTGRES_PASSWORD=password docker compose up -d postgres
-```
-
-Ensure DB exists for this module:
-
-```bash
-docker exec -it postgres psql -U postgres -c "CREATE DATABASE jdbc_one_to_one_uni_directional_relations;"
-```
-
-Run the module (defaults to `postgres` profile):
-
-```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-one-to-one-uni-directional-relation
-DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_one_uni_directional_relations DB_USERNAME=postgres DB_PASSWORD=password ./mvnw spring-boot:run
+$ docker compose -f docker-compose.yml up
 ```
 
 ## Interview-ready explanation (short version)
