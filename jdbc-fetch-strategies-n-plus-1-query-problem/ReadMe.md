@@ -341,9 +341,9 @@ Start PostgreSQL container from repository:
 $ docker compose -f docker-compose.yml up
 ```
 
-## Startup seed data for manual testing
+## Startup seed data for manual testing (PostgreSQL)
 
-When the app starts with profile `postgres`, a bootstrap runner inserts a small deterministic dataset if tables are empty:
+When the app starts with profile `postgres`, a bootstrap initializer runner inserts a small deterministic dataset if tables are empty:
 
 - `3` rows in `authors`
 - `9` rows in `books` (`3` books per author)

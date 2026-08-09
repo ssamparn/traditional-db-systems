@@ -177,6 +177,26 @@ Because owner side uses `orphanRemoval = true`:
 - `application-test.yml` configures H2 for integration tests
 - Maven Surefire enforces `spring.profiles.active=test` during tests
 
+## Startup seed data for manual testing (PostgreSQL)
+
+When the app starts with profile `postgres`, a bootstrap initializer runner inserts a deterministic dataset if tables are empty.
+
+Seeded data:
+
+- `3` teams
+- `9` members (`3` members per team)
+
+Seed teams:
+
+- `ENG-PLATFORM` -> Platform Engineering
+- `ENG-PAYMENTS` -> Payments Engineering
+- `ENG-RISK` -> Risk and Compliance Engineering
+
+Notes:
+
+- Seeding runs only when both `teams` and `members` tables are empty.
+- If existing rows are present, startup seed is skipped.
+
 ## Run app with Docker PostgreSQL
 
 Start PostgreSQL container from repository:
@@ -198,4 +218,3 @@ $ docker compose -f docker-compose.yml up
 - Replacing owner collections without understanding orphan-removal effects.
 - Returning entities directly from controllers.
 - Treating lazy loading errors by switching everything to eager fetch.
-
