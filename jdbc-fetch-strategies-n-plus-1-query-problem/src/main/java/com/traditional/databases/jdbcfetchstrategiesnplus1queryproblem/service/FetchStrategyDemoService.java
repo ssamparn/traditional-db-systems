@@ -7,7 +7,7 @@ import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.db.reposi
 import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.db.repository.ReviewRepository;
 import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.mapper.AuthorMapper;
 import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.web.exception.ResourceNotFoundException;
-import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.web.model.response.AuthorResponse;
+import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.web.model.response.FetchStrategyReportResponse.FetchAuthorGraphResponse;
 import com.traditional.databases.jdbcfetchstrategiesnplus1queryproblem.web.model.response.FetchStrategyReportResponse;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
@@ -43,7 +43,8 @@ public class FetchStrategyDemoService {
                             List.of(author),
                             statistics,
                             authorMapper.countReviews(author),
-                            "1 + N + N pattern can happen while mapping books and reviews lazily"
+                            "1 + N + N pattern can happen while mapping books and reviews lazily",
+                            true
                     );
                 }))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -59,7 +60,8 @@ public class FetchStrategyDemoService {
                             List.of(author),
                             statistics,
                             reviewRepository.countByAuthorId(authorId),
-                            "Optimized fetch plan preloads the parent and books in fewer SQL statements"
+                            "JPQL join fetch preloads Author -> books in fewer SQL statements while keeping reviews lazy for contrast",
+                            false
                     );
                 }))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -75,7 +77,42 @@ public class FetchStrategyDemoService {
                             List.of(author),
                             statistics,
                             reviewRepository.countByAuthorId(authorId),
-                            "EntityGraph keeps repository API clean while forcing the parent->books fetch plan"
+                            "EntityGraph keeps repository API clean while forcing the Author -> books fetch plan and leaving reviews lazy",
+                            false
+                    );
+                }))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Mono<FetchStrategyReportResponse> oneParentJoinFetchDeep(Long authorId) {
+        return Mono.fromCallable(() -> inTransaction(() -> {
+                    Statistics statistics = resetStatistics();
+                    Author author = authorRepository.findByIdWithBooksAndReviewsJoinFetch(authorId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Author not found with Id: " + authorId));
+                    return buildReport(
+                            "ONE_PARENT_JOIN_FETCH_DEEP",
+                            List.of(author),
+                            statistics,
+                            authorMapper.countReviews(author),
+                            "JPQL join fetch preloads Author -> books -> reviews to collapse the N+1+N chain for one aggregate",
+                            true
+                    );
+                }))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Mono<FetchStrategyReportResponse> oneParentEntityGraphDeep(Long authorId) {
+        return Mono.fromCallable(() -> inTransaction(() -> {
+                    Statistics statistics = resetStatistics();
+                    Author author = authorRepository.findByIdWithBooksAndReviewsEntityGraph(authorId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Author not found with Id: " + authorId));
+                    return buildReport(
+                            "ONE_PARENT_ENTITY_GRAPH_DEEP",
+                            List.of(author),
+                            statistics,
+                            authorMapper.countReviews(author),
+                            "EntityGraph preloads Author -> books -> reviews without embedding the fetch plan in JPQL",
+                            true
                     );
                 }))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -90,7 +127,8 @@ public class FetchStrategyDemoService {
                             authors,
                             statistics,
                             authors.stream().mapToInt(authorMapper::countReviews).sum(),
-                            "Classic N+1+N query explosion when traversing multiple parent graphs"
+                            "Classic N+1+N query explosion when traversing multiple parent graphs",
+                            true
                     );
                 }))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -105,7 +143,8 @@ public class FetchStrategyDemoService {
                             authors,
                             statistics,
                             reviewRepository.countByAuthorIds(authors.stream().map(Author::getId).toList()),
-                            "Optimized fetch plan reduces query fan-out for list retrieval while leaving reviews lazy"
+                            "JPQL join fetch reduces query fan-out for Author -> books list retrieval while leaving reviews lazy",
+                            false
                     );
                 }))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -120,7 +159,40 @@ public class FetchStrategyDemoService {
                             authors,
                             statistics,
                             reviewRepository.countByAuthorIds(authors.stream().map(Author::getId).toList()),
-                            "EntityGraph alternative to JPQL join fetch for read models while leaving reviews lazy"
+                            "EntityGraph alternative to JPQL join fetch for Author -> books list retrieval while leaving reviews lazy",
+                            false
+                    );
+                }))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Mono<FetchStrategyReportResponse> manyParentsJoinFetchDeep() {
+        return Mono.fromCallable(() -> inTransaction(() -> {
+                    Statistics statistics = resetStatistics();
+                    List<Author> authors = authorRepository.findAllWithBooksAndReviewsJoinFetch();
+                    return buildReport(
+                            "MANY_PARENTS_JOIN_FETCH_DEEP",
+                            authors,
+                            statistics,
+                            authors.stream().mapToInt(authorMapper::countReviews).sum(),
+                            "JPQL join fetch preloads Author -> books -> reviews for the full list, avoiding the N+1+N chain at the cost of wider joined rows",
+                            true
+                    );
+                }))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    public Mono<FetchStrategyReportResponse> manyParentsEntityGraphDeep() {
+        return Mono.fromCallable(() -> inTransaction(() -> {
+                    Statistics statistics = resetStatistics();
+                    List<Author> authors = authorRepository.findAllWithBooksAndReviewsEntityGraph();
+                    return buildReport(
+                            "MANY_PARENTS_ENTITY_GRAPH_DEEP",
+                            authors,
+                            statistics,
+                            authors.stream().mapToInt(authorMapper::countReviews).sum(),
+                            "EntityGraph preloads Author -> books -> reviews for the full list while keeping repository method names cleaner than custom JPQL",
+                            true
                     );
                 }))
                 .subscribeOn(Schedulers.boundedElastic());
@@ -150,8 +222,11 @@ public class FetchStrategyDemoService {
                                                     List<Author> authors,
                                                     Statistics statistics,
                                                     long reviewCount,
-                                                    String note) {
-        List<AuthorResponse> responses = authors.stream().map(authorMapper::toResponse).toList();
+                                                    String note,
+                                                    boolean includeReviewsInPayload) {
+        List<FetchAuthorGraphResponse> responses = includeReviewsInPayload
+                ? authors.stream().map(authorMapper::toFetchGraphWithReviews).toList()
+                : authors.stream().map(authorMapper::toFetchGraph).toList();
         int bookCount = authors.stream().mapToInt(authorMapper::countBooks).sum();
         long loadedAssociations = authorMapper.countLoadedAuthorsOnBooks(authors);
 

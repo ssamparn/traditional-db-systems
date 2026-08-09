@@ -18,6 +18,30 @@ public class FetchStrategyReportResponse {
     private int bookCount;
     private long reviewCount;
     private String notes;
-    private List<AuthorResponse> authors;
+    private List<FetchAuthorGraphResponse> authors;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FetchAuthorGraphResponse {
+
+        private Long id;
+        private String firstName;
+        private String lastName;
+        private String email;
+        private List<FetchBookGraphResponse> books;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FetchBookGraphResponse {
+
+        private Long id;
+        private String title;
+        private String isbn;
+        private Integer publishedYear;
+        private List<ReviewSummaryResponse> reviews;
+    }
 }
 

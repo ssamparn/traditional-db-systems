@@ -15,7 +15,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     Optional<Author> findByEmail(String email);
 
-    @Query("select a from Author a left join fetch a.books where a.id = :authorId")
+    @Query("select distinct a from Author a left join fetch a.books where a.id = :authorId")
     Optional<Author> findByIdWithBooks(@Param("authorId") Long authorId);
 
     @EntityGraph(attributePaths = "books")

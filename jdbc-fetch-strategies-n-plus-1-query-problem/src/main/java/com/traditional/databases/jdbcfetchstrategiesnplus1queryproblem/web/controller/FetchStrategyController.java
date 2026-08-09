@@ -36,6 +36,18 @@ public class FetchStrategyController {
                 .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
     }
 
+    @GetMapping("/fetch-demo/author/{authorId}/join-fetch/deep")
+    public Mono<ResponseEntity<FetchStrategyReportResponse>> oneParentJoinFetchDeep(@PathVariable Long authorId) {
+        return fetchStrategyDemoService.oneParentJoinFetchDeep(authorId)
+                .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    }
+
+    @GetMapping("/fetch-demo/author/{authorId}/entity-graph/deep")
+    public Mono<ResponseEntity<FetchStrategyReportResponse>> oneParentEntityGraphDeep(@PathVariable Long authorId) {
+        return fetchStrategyDemoService.oneParentEntityGraphDeep(authorId)
+                .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    }
+
     @GetMapping("/fetch-demo/authors/lazy")
     public Mono<ResponseEntity<FetchStrategyReportResponse>> manyParentsLazy() {
         return fetchStrategyDemoService.manyParentsLazy()
@@ -51,6 +63,18 @@ public class FetchStrategyController {
     @GetMapping("/fetch-demo/authors/entity-graph")
     public Mono<ResponseEntity<FetchStrategyReportResponse>> manyParentsEntityGraph() {
         return fetchStrategyDemoService.manyParentsEntityGraph()
+                .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    }
+
+    @GetMapping("/fetch-demo/authors/join-fetch/deep")
+    public Mono<ResponseEntity<FetchStrategyReportResponse>> manyParentsJoinFetchDeep() {
+        return fetchStrategyDemoService.manyParentsJoinFetchDeep()
+                .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
+    }
+
+    @GetMapping("/fetch-demo/authors/entity-graph/deep")
+    public Mono<ResponseEntity<FetchStrategyReportResponse>> manyParentsEntityGraphDeep() {
+        return fetchStrategyDemoService.manyParentsEntityGraphDeep()
                 .map(response -> new ResponseEntity<>(response, HttpStatus.OK));
     }
 

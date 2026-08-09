@@ -69,6 +69,11 @@ Use **`JOIN FETCH` / `@EntityGraph`** when:
 - `Book.reviews` -> `LAZY`
 - `Book.author` -> `EAGER`
 
+Implementation note for the deep demos:
+
+- `Book.reviews` is stored as an ordered entity-side set, while API payloads are still emitted as sorted lists
+- this avoids Hibernate's multi-bag fetch limitation when demonstrating `Author -> books -> reviews` join-fetch and entity-graph paths
+
 This intentionally demonstrates:
 
 - lazy query explosion on deep traversal
@@ -143,9 +148,13 @@ Base path: `/api/v1`
 - `GET /fetch-demo/author/{authorId}/lazy`
 - `GET /fetch-demo/author/{authorId}/join-fetch`
 - `GET /fetch-demo/author/{authorId}/entity-graph`
+- `GET /fetch-demo/author/{authorId}/join-fetch/deep`
+- `GET /fetch-demo/author/{authorId}/entity-graph/deep`
 - `GET /fetch-demo/authors/lazy`
 - `GET /fetch-demo/authors/join-fetch`
 - `GET /fetch-demo/authors/entity-graph`
+- `GET /fetch-demo/authors/join-fetch/deep`
+- `GET /fetch-demo/authors/entity-graph/deep`
 - `GET /fetch-demo/books/eager`
 
 Each fetch-demo response returns:
@@ -155,6 +164,9 @@ Each fetch-demo response returns:
 - `authorCount`, `bookCount`, `reviewCount`
 - `loadedAssociationCount`
 - `notes`
+- `authors[] -> books[] -> reviews[]` for deep graph demos
+
+Shallow optimization demos (`/join-fetch`, `/entity-graph`) intentionally preload only `Author -> books` and keep `reviews` out of payload loading so you can compare first-hop optimization separately from full-graph optimization.
 
 ## Query explosion walkthrough
 
@@ -189,13 +201,30 @@ This is the practical `N+1+N` query explosion.
 - requires careful `distinct` usage
 - in this module, the optimized path focuses on preloading `Author -> Book` so the demo stays stable with nested `Review` bags
 
+### Mitigation A2: deep join fetch for full graph
+
+`GET /fetch-demo/authors/join-fetch/deep`
+
+- preloads `Author -> books -> reviews`
+- demonstrates how to eliminate `1 + N + N` for a nested read model
+- returns the full nested payload so you can inspect `authors[].books[].reviews[]`
+- reminds you that fewer SQL statements can still mean wider joined result sets and more duplicated row data on the wire
+
 ### Mitigation B: entity graph
 
 `GET /fetch-demo/authors/entity-graph`
 
 - cleaner method signatures than many custom fetch-join JPQLs
 - reusable fetch plans for multiple use cases
-- in this module, the entity graph is used to prefetch the parent->book layer while keeping review loading lazy for the comparison demo
+- in this module, the entity graph is used to prefetch the parent->book layer while keeping review loading lazy for the comparison demo.
+
+### Mitigation B2: deep entity graph for full graph
+
+`GET /fetch-demo/authors/entity-graph/deep`
+
+- preloads `Author -> books -> reviews` using `@EntityGraph(attributePaths = {"books", "books.reviews"})`
+- keeps repository API expressive without repeating long JPQL fetch joins for each read path
+- useful in interviews when explaining that fetch policy should be chosen per use case, not globally on the entity mapping
 
 ### EAGER caveat scenario
 
@@ -241,6 +270,30 @@ This module enables:
 
 Use logs plus `queryCount` from fetch-demo endpoints to explain performance behavior clearly in interviews.
 
+### What SQL/query-count story should you tell in an interview?
+
+For `GET /fetch-demo/authors/lazy`:
+
+- one SQL to load authors
+- then one SQL per author to load books
+- then one SQL per book to load reviews
+- this is the classic `1 + N + N` explosion in this demo graph
+
+For `GET /fetch-demo/authors/join-fetch` and `GET /fetch-demo/authors/entity-graph`:
+
+- the first hop `Author -> books` is optimized
+- review rows are still intentionally not traversed in payload mapping
+- this teaches that partial optimization is still a valid architectural step when the endpoint does not need the entire deep graph
+
+For `GET /fetch-demo/authors/join-fetch/deep` and `GET /fetch-demo/authors/entity-graph/deep`:
+
+- the endpoint actually needs `authors -> books -> reviews`
+- repository methods preload the whole graph in advance
+- query count should drop materially compared with the lazy scenario
+- but the trade-off becomes row multiplication and potentially larger result sets
+
+That is the senior-engineer answer: **optimize the exact read model you need, then prove the result with SQL logs and query counts.**
+
 ## API behavior and validation
 
 Service-level validation enforces:
@@ -265,6 +318,7 @@ This is intentionally exercised in integration tests.
 
 - **Controller integration**: `AuthorControllerIntegrationTest`, `BookControllerIntegrationTest`, `ReviewControllerIntegrationTest`
 - **Fetch behavior integration**: `FetchStrategyControllerIntegrationTest` (lazy vs join-fetch vs entity-graph query counts)
+- **Deep fetch behavior integration**: `FetchStrategyControllerIntegrationTest` also covers nested `Author -> books -> reviews` join-fetch/entity-graph demos and payload assertions
 - **Lifecycle integration**: `AuthorBookReviewLifecycleIntegrationTest`
 
 ## Runtime profile strategy

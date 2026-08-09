@@ -82,6 +82,50 @@ class FetchStrategyControllerIntegrationTest {
     }
 
     @Test
+    void oneParent_deepJoinFetchAndEntityGraphShouldLoadBooksAndReviews() {
+        Long authorId = seedData(1, 3, 2)[0];
+
+        long lazyQueries = runScenario("/api/v1/fetch-demo/author/{authorId}/lazy", authorId);
+        Map<?, ?> joinFetchResponse = runScenarioResponse("/api/v1/fetch-demo/author/{authorId}/join-fetch/deep", authorId);
+        Map<?, ?> entityGraphResponse = runScenarioResponse("/api/v1/fetch-demo/author/{authorId}/entity-graph/deep", authorId);
+
+        long joinFetchQueries = extractQueryCount(joinFetchResponse);
+        long entityGraphQueries = extractQueryCount(entityGraphResponse);
+
+        if (lazyQueries <= joinFetchQueries) {
+            throw new AssertionError("Expected lazy query count to exceed deep join fetch. lazy=" + lazyQueries + ", joinFetch=" + joinFetchQueries);
+        }
+        if (lazyQueries <= entityGraphQueries) {
+            throw new AssertionError("Expected lazy query count to exceed deep entity graph. lazy=" + lazyQueries + ", entityGraph=" + entityGraphQueries);
+        }
+
+        assertDeepGraph(joinFetchResponse, "ONE_PARENT_JOIN_FETCH_DEEP", 1, 3, 6, 2);
+        assertDeepGraph(entityGraphResponse, "ONE_PARENT_ENTITY_GRAPH_DEEP", 1, 3, 6, 2);
+    }
+
+    @Test
+    void manyParents_deepJoinFetchAndEntityGraphShouldLoadFullGraphWithoutExplosion() {
+        seedData(3, 2, 2);
+
+        long lazyQueries = runScenario("/api/v1/fetch-demo/authors/lazy", null);
+        Map<?, ?> joinFetchResponse = runScenarioResponse("/api/v1/fetch-demo/authors/join-fetch/deep", null);
+        Map<?, ?> entityGraphResponse = runScenarioResponse("/api/v1/fetch-demo/authors/entity-graph/deep", null);
+
+        long joinFetchQueries = extractQueryCount(joinFetchResponse);
+        long entityGraphQueries = extractQueryCount(entityGraphResponse);
+
+        if (lazyQueries <= joinFetchQueries) {
+            throw new AssertionError("Expected lazy query count to exceed deep join fetch. lazy=" + lazyQueries + ", joinFetch=" + joinFetchQueries);
+        }
+        if (lazyQueries <= entityGraphQueries) {
+            throw new AssertionError("Expected lazy query count to exceed deep entity graph. lazy=" + lazyQueries + ", entityGraph=" + entityGraphQueries);
+        }
+
+        assertDeepGraph(joinFetchResponse, "MANY_PARENTS_JOIN_FETCH_DEEP", 3, 6, 12, 2);
+        assertDeepGraph(entityGraphResponse, "MANY_PARENTS_ENTITY_GRAPH_DEEP", 3, 6, 12, 2);
+    }
+
+    @Test
     void manyBooks_eagerManyToOneShouldLoadAuthorsForEachBook() {
         seedData(2, 2, 1);
 
@@ -97,6 +141,10 @@ class FetchStrategyControllerIntegrationTest {
     }
 
     private long runScenario(String uriTemplate, Long authorId) {
+        return extractQueryCount(runScenarioResponse(uriTemplate, authorId));
+    }
+
+    private Map<?, ?> runScenarioResponse(String uriTemplate, Long authorId) {
         WebTestClient.ResponseSpec responseSpec;
         if (authorId == null) {
             responseSpec = webTestClient.get()
@@ -113,7 +161,10 @@ class FetchStrategyControllerIntegrationTest {
                 .expectBody(Map.class)
                 .returnResult()
                 .getResponseBody();
-        Map<?, ?> responseMap = response instanceof Map<?, ?> map ? map : Map.of();
+        return response instanceof Map<?, ?> map ? map : Map.of();
+    }
+
+    private long extractQueryCount(Map<?, ?> responseMap) {
         Object queryCount = responseMap.get("queryCount");
         if (queryCount instanceof Integer value) {
             return value.longValue();
@@ -122,6 +173,57 @@ class FetchStrategyControllerIntegrationTest {
             return value;
         }
         throw new AssertionError("queryCount missing in fetch strategy response");
+    }
+
+    private void assertDeepGraph(Map<?, ?> response,
+                                 String expectedScenario,
+                                 int expectedAuthorCount,
+                                 int expectedBookCount,
+                                 int expectedReviewCount,
+                                 int expectedReviewsPerFirstBook) {
+        Object scenario = response.get("scenario");
+        if (!expectedScenario.equals(scenario)) {
+            throw new AssertionError("Expected scenario " + expectedScenario + " but got " + scenario);
+        }
+
+        assertNumericField(response, "authorCount", expectedAuthorCount);
+        assertNumericField(response, "bookCount", expectedBookCount);
+        assertNumericField(response, "reviewCount", expectedReviewCount);
+
+        Object authorsObject = response.get("authors");
+        if (!(authorsObject instanceof java.util.List<?> authors) || authors.isEmpty()) {
+            throw new AssertionError("Expected authors list in deep fetch response");
+        }
+
+        Object firstAuthor = authors.getFirst();
+        if (!(firstAuthor instanceof Map<?, ?> firstAuthorMap)) {
+            throw new AssertionError("Expected first author entry to be an object");
+        }
+
+        Object booksObject = firstAuthorMap.get("books");
+        if (!(booksObject instanceof java.util.List<?> books) || books.isEmpty()) {
+            throw new AssertionError("Expected nested books in deep fetch response");
+        }
+
+        Object firstBook = books.getFirst();
+        if (!(firstBook instanceof Map<?, ?> firstBookMap)) {
+            throw new AssertionError("Expected first book entry to be an object");
+        }
+
+        Object reviewsObject = firstBookMap.get("reviews");
+        if (!(reviewsObject instanceof java.util.List<?> reviews)) {
+            throw new AssertionError("Expected nested reviews in deep fetch response");
+        }
+        if (reviews.size() != expectedReviewsPerFirstBook) {
+            throw new AssertionError("Expected reviews per first book=" + expectedReviewsPerFirstBook + " but got " + reviews.size());
+        }
+    }
+
+    private void assertNumericField(Map<?, ?> response, String fieldName, int expectedValue) {
+        Object value = response.get(fieldName);
+        if (!(value instanceof Number number) || number.intValue() != expectedValue) {
+            throw new AssertionError("Expected " + fieldName + "=" + expectedValue + " but got " + value);
+        }
     }
 
     private Long[] seedData(int authorCount, int booksPerAuthor, int reviewsPerBook) {
