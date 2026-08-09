@@ -5,7 +5,14 @@ This module demonstrates a production-style **unidirectional one-to-one** betwee
 - `Employee` (owning side)
 - `Workstation` (dependent side without reverse navigation)
 
-It is intentionally designed for learning JPA ownership, one-to-one constraints, orphan lifecycle handling, and API-safe DTO contracts.
+This defines a true unidirectional one-to-one relationship from Employee to Workstation.
+This means:
+- One `Employee` has exactly one `Workstation`.
+- One `Workstation` can belong to only one `Employee`.
+- The relationship is unidirectional because only `Employee` knows about `Workstation`.
+- `Workstation` has no field referencing `Employee`.
+- It is intentionally designed for learning JPA ownership, one-to-one constraints, orphan lifecycle handling, and API-safe DTO contracts.
+- The `UNIQUE` constraint is what makes it a **true one-to-one relationship**. Without it, multiple employees could reference the same workstation, effectively becoming a **many-to-one relationship**.
 
 ## Why this relation matters (architect point of view)
 
@@ -13,10 +20,10 @@ Use one-to-one when two tables have strict **1:1 cardinality** but should stay s
 
 Typical reasons to split:
 
-- **Security boundaries**: isolate sensitive or operationally restricted columns
-- **Data ownership**: two teams/domains may evolve attributes at different speeds
-- **Write-frequency separation**: volatile child data can change without bloating the parent table
-- **Storage and access patterns**: parent lookups are frequent; child fields are fetched only in specific use cases
+- **Security boundaries**: Isolate sensitive or operationally restricted columns
+- **Data ownership**: Two teams/domains may evolve attributes at different speeds
+- **Write-frequency separation**: Volatile child data can change without bloating the parent table
+- **Storage and access patterns**: Parent lookups are frequent; child fields are fetched only in specific use cases
 
 ## When to use unidirectional one-to-one?
 
@@ -44,15 +51,15 @@ This avoids unnecessary object graph complexity and reduces accidental recursive
 
 Use **unidirectional** when:
 
-- only one side is queried in code
-- reverse traversal has no business value
-- you want simpler APIs and fewer synchronization bugs
+- Only one side is queried in code
+- Reverse traversal has no business value
+- You want simpler APIs and fewer synchronization bugs
 
 Use **bidirectional** when:
 
-- both navigations are business-critical
-- reverse lookups are frequent in domain logic
-- you deliberately manage graph consistency on both sides
+- Both navigations are business-critical
+- Reverse lookups are frequent in domain logic
+- You deliberately manage graph consistency on both sides
 
 ## Setter design rationale (uni vs bi)
 
@@ -69,14 +76,14 @@ Since there is no inverse field to synchronize, a plain Lombok setter is usually
 
 Even in unidirectional mappings, add a custom setter when you need domain invariants or side effects, such as:
 
-- rejecting invalid transitions (state-machine style rules)
-- triggering audit/event hooks
-- centralizing replacement semantics (e.g., protect from accidental null assignment)
+- Rejecting invalid transitions (state-machine style rules)
+- Triggering audit/event hooks
+- Centralizing replacement semantics (e.g., protect from accidental null assignment)
 
 Rule of thumb:
 
-- bidirectional -> synchronization helpers strongly recommended
-- unidirectional -> simple setter is typically fine
+- Bidirectional -> Synchronization helpers strongly recommended
+- Unidirectional -> Simple setter is typically fine
 
 ## Mapping in this module
 
