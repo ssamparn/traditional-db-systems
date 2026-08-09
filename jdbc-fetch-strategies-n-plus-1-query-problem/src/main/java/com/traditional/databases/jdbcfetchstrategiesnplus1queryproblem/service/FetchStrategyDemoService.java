@@ -52,7 +52,7 @@ public class FetchStrategyDemoService {
     public Mono<FetchStrategyReportResponse> oneParentJoinFetch(Long authorId) {
         return Mono.fromCallable(() -> inTransaction(() -> {
                     Statistics statistics = resetStatistics();
-                    Author author = authorRepository.findByIdWithBooksGraph(authorId)
+                    Author author = authorRepository.findByIdWithBooks(authorId)
                             .orElseThrow(() -> new ResourceNotFoundException("Author not found with Id: " + authorId));
                     return buildReport(
                             "ONE_PARENT_JOIN_FETCH",
@@ -99,7 +99,7 @@ public class FetchStrategyDemoService {
     public Mono<FetchStrategyReportResponse> manyParentsJoinFetch() {
         return Mono.fromCallable(() -> inTransaction(() -> {
                     Statistics statistics = resetStatistics();
-                    List<Author> authors = authorRepository.findAllWithBooksGraph();
+                    List<Author> authors = authorRepository.findAllWithBooks();
                     return buildReport(
                             "MANY_PARENTS_JOIN_FETCH",
                             authors,

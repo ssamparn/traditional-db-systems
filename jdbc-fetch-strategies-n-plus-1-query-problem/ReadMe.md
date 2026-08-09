@@ -160,7 +160,7 @@ Each fetch-demo response returns:
 
 ### One parent with children and grandchildren
 
-`GET /fetch-demo/author/{id}/lazy`
+`GET /fetch-demo/author/{authorId}/lazy`
 
 Typical pattern:
 
