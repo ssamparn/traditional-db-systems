@@ -188,18 +188,10 @@ select id, first_name, last_name, email, role_id_fk from users;
 
 ## Run app with Docker PostgreSQL
 
-```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems
-POSTGRES_USER=postgres POSTGRES_PASSWORD=password docker compose up -d postgres
-```
+Start PostgreSQL container from repository:
 
 ```bash
-docker exec -it postgres psql -U postgres -c "CREATE DATABASE jdbc_one_to_many_bi_directional_relations;"
-```
-
-```bash
-cd /Users/sashank/Personal/projects/backend/traditional-db-systems/jdbc-one-to-many-bi-directional-relation
-DB_HOST=localhost DB_PORT=5432 DB_NAME=jdbc_one_to_many_bi_directional_relations DB_USERNAME=postgres DB_PASSWORD=password ./mvnw spring-boot:run
+$ docker compose -f docker-compose.yml up
 ```
 
 ## Interview-ready quick answers
