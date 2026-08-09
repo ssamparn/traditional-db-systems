@@ -230,7 +230,12 @@ This is the practical `N+1+N` query explosion.
 
 `GET /fetch-demo/books/eager`
 
-- demonstrates that eager many-to-one can load data even when caller does not need it
+- demonstrates that eager many-to-one can load data even when caller does not need it. 
+- This endpoint is intentionally a book-centric demo. It does not return authors in the payload; it only measures the cost of loading them eagerly.
+- FetchType.EAGER on Book.author does not guarantee a single SQL join. 
+- In Hibernate/JPA, it can still result in separate selects for associated authors depending on the query path and SQL generation strategy.
+  So this endpoint is demonstrating exactly the lesson:
+  Even when the caller only needs book fields, an eager many-to-one can silently pull in extra author data.
 
 ## SQL checks to run
 
