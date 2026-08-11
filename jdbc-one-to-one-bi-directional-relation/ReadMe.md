@@ -2,21 +2,30 @@
 
 This module demonstrates a production-style **bidirectional one-to-one** model between:
 
-- `Organization` (owning side)
-- `Address` (inverse side)
+- `Organization` (Owning side)
+- `Address` (Inverse side with reverse navigation)
 
-It is intentionally designed for learning JPA mapping semantics, object-graph consistency, and API-safe modeling.
+This defines a true biidirectional one-to-one relationship from `Address` to `Organization`.
+This means:
+- One `Organization` has exactly one `Address`.
+- One `Address` can belong to only one `Organization`.
+- The relationship is bidirectional because both `Organization` & `Address` contain references to each other.
+- `Organization` has a field referencing `Address` & `Address` has a field referencing `Organization`.
+- One side owns the relationship `Organization` & the other side `Address` is marked with `mappedBy` to indicate it is the inverse side.
+- It is intentionally designed for learning JPA ownership, one-to-one constraints, orphan lifecycle handling, and API-safe DTO contracts.
+- The `UNIQUE` constraint is what makes it a **true one-to-one relationship**. Without it, multiple organizations could reference the same addresses, effectively becoming a **many-to-one relationship**.
+- Also, custom setters are designed to keep both references synchronized, ensuring that navigation works correctly in either direction both in memory and when persisted.
 
 ## Why this relation matters (architect point of view)
 
-Use one-to-one when two aggregates have a strict **cardinality of exactly one related row** and you still want separate tables.
+Use **`@OneToOne`** when two aggregates have a strict **1:1 cardinality of exactly one related row** but should stay separate for architecture reasons
 
 Typical reasons to split into two tables:
 
-- **Bounded context separation**: core entity (`Organization`) vs optional/volatile details (`Address`)
+- **Bounded context separation**: Core entity (`Organization`) vs optional/volatile details (`Address`)
 - **Security/governance**: PII fields can be isolated in a separate table with tighter controls
-- **Evolution and ownership**: independent schema evolution without bloating a single table
-- **Performance tuning**: fetch only what is needed by use case (especially with larger dependent payloads)
+- **Evolution and ownership**: Independent schema evolution without bloating a single table
+- **Performance tuning**: Fetch only what is needed by use case (especially with larger dependent payloads)
 
 ## When to use bidirectional one-to-one?
 
@@ -48,8 +57,8 @@ Without this synchronization, JPA can persist surprising states and business log
 
 Rule of thumb:
 
-- bidirectional -> synchronization helpers strongly recommended
-- unidirectional -> simple setter is typically fine
+- bidirectional -> synchronization helpers strongly recommended.
+- unidirectional -> simple setter is typically fine.
 
 ## Mapping in this module
 

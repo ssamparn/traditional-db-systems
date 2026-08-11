@@ -2,10 +2,10 @@
 
 This module demonstrates a production-style **unidirectional one-to-one** between:
 
-- `Employee` (owning side)
-- `Workstation` (dependent side without reverse navigation)
+- `Employee` (Owning side)
+- `Workstation` (Dependent side without reverse navigation)
 
-This defines a true unidirectional one-to-one relationship from Employee to Workstation.
+This defines a true unidirectional one-to-one relationship from `Employee` to `Workstation`.
 This means:
 - One `Employee` has exactly one `Workstation`.
 - One `Workstation` can belong to only one `Employee`.
@@ -16,7 +16,7 @@ This means:
 
 ## Why this relation matters (architect point of view)
 
-Use one-to-one when two tables have strict **1:1 cardinality** but should stay separate for architecture reasons.
+Use **`@OneToOne`** when two tables have strict **1:1 cardinality of exactly one related row** but should stay separate for architecture reasons.
 
 Typical reasons to split:
 
